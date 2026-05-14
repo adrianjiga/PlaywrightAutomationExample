@@ -43,7 +43,7 @@ test.describe("Register Form", () => {
       Hobbies: "Sports, Reading",
       Picture: "book.json",
       Address: testUser.address,
-      "State and City": "NCR Delhi",
+      "State and City": "Germany Berlin",
     };
 
     await registerFormPage.verifySubmittedData(expectedData);
