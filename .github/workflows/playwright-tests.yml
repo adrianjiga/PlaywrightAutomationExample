@@ -1,0 +1,166 @@
+name: Run Tests
+
+on:
+  schedule:
+    - cron: "0 7 * * 1-5" # Every Monday to Friday at 07:00 UTC
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to run tests against"
+        required: false
+        default: "prod"
+        type: choice
+        options:
+          - prod
+      browser:
+        description: "Browser to run tests in"
+        required: false
+        default: "chromium"
+        type: choice
+        options:
+          - chromium
+          - firefox
+          - webkit
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.group.name }} - ${{ matrix.browser }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        group:
+          - name: api
+            tag: "@api"
+          - name: ui
+            tag: "@ui"
+          - name: webtables
+            tag: "@webTables"
+        browser: [chromium, firefox]
+        exclude:
+          - group:
+              name: api
+            browser: firefox
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Run ${{ matrix.group.name }} Tests
+        run: |
+          npx playwright test \
+            --grep '${{ matrix.group.tag }}' \
+            --project=${{ github.event.inputs.browser || matrix.browser }}
+        env:
+          TEST_ENV: ${{ github.event.inputs.environment || 'prod' }}
+
+      - name: Upload Test Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results-${{ matrix.group.name }}-${{ matrix.browser }}
+          path: |
+            playwright-report/
+            test-results/
+            reports/
+          if-no-files-found: ignore
+          retention-days: 30
+
+  # Responsive testing job for UI tests
+  responsive-tests:
+    name: Responsive - ${{ matrix.viewport }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        viewport: [mobile-chrome, tablet]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run UI Tests - ${{ matrix.viewport }}
+        run: |
+          npx playwright test \
+            --grep '@ui' \
+            --project=${{ matrix.viewport }}
+
+      - name: Upload Responsive Test Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results-responsive-${{ matrix.viewport }}
+          path: |
+            playwright-report/
+            test-results/
+            reports/
+          if-no-files-found: ignore
+          retention-days: 30
+
+  # Merge and publish reports
+  merge-reports:
+    name: Merge Test Reports
+    needs: [test, responsive-tests]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-results
+
+      - name: List downloaded artifacts
+        run: ls -la all-results/
+
+      - name: Merge HTML Reports
+        run: |
+          npm i -D @playwright/test
+          mkdir -p reports/final
+          npx playwright merge-reports --reporter html ./all-results/*/reports || true
+          mv playwright-report reports/final/ || true
+
+      - name: Upload Final Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-test-report
+          path: reports/final/
+          retention-days: 30
