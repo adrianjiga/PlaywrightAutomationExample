@@ -72,8 +72,8 @@ Specs are tagged in the test title with `@ui`, `@api`, `@webTables`, `@smoke`. T
 
 Two workflows in `.github/workflows/`:
 
-- `ci.yml` — PR validation: lint, format check, smoke tests. **Currently triggers on `pull_request: branches: [master]`**, but the repo's default branch is `main`. PRs into `main` therefore do not run this workflow. This is a known mismatch; treat it as a bug worth fixing rather than a feature.
-- `playwright-tests.yml` — scheduled (Mon–Fri 07:00 UTC) and on push-to-master. Sharded matrix: `{api, ui, webTables}` × `{chromium, firefox}` (api skipped on firefox) + responsive jobs for `mobile-chrome` and `tablet`, with a `merge-reports` job downstream.
+- `ci.yml` — PR validation against `main`: lint, format check, smoke tests on chromium.
+- `playwright-tests.yml` — scheduled (Mon–Fri 07:00 UTC), on push to `main`, and on `workflow_dispatch`. Sharded matrix: `{api, ui, webTables}` × `{chromium, firefox}` (api skipped on firefox) + responsive jobs for `mobile-chrome` (chromium) and `tablet` (webkit), with a `merge-reports` job downstream. The responsive matrix uses `include:` form so each viewport carries its required browser — the install step keys off `matrix.browser`, so `tablet` installs webkit and `mobile-chrome` installs chromium. If you add a viewport, add its browser to the same matrix entry.
 
 All `actions/*` references are **pinned to full commit SHAs** with a trailing `# vX.Y.Z` comment (e.g. `actions/checkout@de0fac2... # v6.0.2`). Dependabot recognizes this pattern and bumps both the SHA and the comment together — keep the format consistent when introducing new actions.
 
