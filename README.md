@@ -240,6 +240,10 @@ Test artifacts are retained for 30 days:
 - Traces (on first retry)
 - HTML reports
 
+### Action Pinning
+
+All third-party actions in `.github/workflows/` are pinned to full commit SHAs with a trailing version comment (e.g. `actions/checkout@de0fac2... # v6.0.2`). This follows GitHub's security hardening guidance: SHAs are immutable, so a compromised tag cannot silently re-point at malicious code. Dependabot recognizes the pattern and bumps both the SHA and the comment together on its weekly schedule.
+
 ## Reports
 
 ### View HTML Report
