@@ -1,15 +1,15 @@
 /**
- * Page Object for DemoQA Buttons page
- * @see https://demoqa.com/buttons
+ * Page Object for Buttons helper page
+ * @see https://adrianjiga.github.io/qa/helpers/buttons/
  */
 export class ButtonsPage {
   constructor(page) {
     this.page = page;
-    this.url = "/buttons";
+    this.url = "https://adrianjiga.github.io/qa/helpers/buttons/";
 
     this.doubleClickButton = page.locator("#doubleClickBtn");
     this.rightClickButton = page.locator("#rightClickBtn");
-    this.dynamicClickButton = page.locator("div.mt-4:nth-child(4) button");
+    this.dynamicClickButton = page.locator('[data-cy="dynamic-click-btn"]');
     this.doubleClickMessage = page.locator("#doubleClickMessage");
     this.rightClickMessage = page.locator("#rightClickMessage");
     this.dynamicClickMessage = page.locator("#dynamicClickMessage");
@@ -49,7 +49,7 @@ export class ButtonsPage {
    * Perform dynamic click on the dynamic button
    */
   async performDynamicClick() {
-    await this.dynamicClickButton.click({ force: true });
+    await this.dynamicClickButton.click();
     return this;
   }
 
