@@ -34,7 +34,7 @@ npx playwright install
 ```
 ├── tests/
 │   ├── e2e/                          # Test specifications
-│   │   ├── api.spec.js               # Book Store API tests
+│   │   ├── api.spec.js               # JSONPlaceholder API tests
 │   │   ├── buttons.spec.js           # Button interaction tests
 │   │   ├── registerForm.spec.js      # Form validation tests
 │   │   ├── waitExample.spec.js       # Custom wait patterns
@@ -187,21 +187,6 @@ const users = userFactory.generateBatch(5);
 // Array of 5 user objects
 ```
 
-## API Helpers
-
-```javascript
-import { API_CONFIG, validateBookSchema, validateResponse } from "../../utils/apiHelpers.js";
-
-// Make API request
-const response = await request.get(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.books}`);
-
-// Validate response
-await validateResponse(response, expect, 200);
-
-// Validate schema
-validateBookSchema(book, expect);
-```
-
 ## Configuration
 
 ### Environment Configuration
@@ -254,6 +239,10 @@ Test artifacts are retained for 30 days:
 - Videos (on failure only)
 - Traces (on first retry)
 - HTML reports
+
+### Action Pinning
+
+All third-party actions in `.github/workflows/` are pinned to full commit SHAs with a trailing version comment (e.g. `actions/checkout@de0fac2... # v6.0.2`). This follows GitHub's security hardening guidance: SHAs are immutable, so a compromised tag cannot silently re-point at malicious code. Dependabot recognizes the pattern and bumps both the SHA and the comment together on its weekly schedule.
 
 ## Reports
 

@@ -10,12 +10,10 @@ test.describe("WebTables", () => {
     await webTablesPage.visit();
   });
 
-  test("search for a record @webTables", async ({ page }) => {
+  test("search for a record @webTables", async () => {
     await webTablesPage.search("Cierra");
 
-    const row = page.locator('.rt-tbody div[role="row"]').filter({
-      hasText: "Cierra",
-    });
+    const row = webTablesPage.tableRow.filter({ hasText: "Cierra" });
     await expect(row.first()).toBeVisible();
     await webTablesPage.verifyRowCount(1);
 
@@ -23,7 +21,7 @@ test.describe("WebTables", () => {
     await webTablesPage.verifyMinRowCount(2);
   });
 
-  test("edit an existing record @webTables", async ({ page }) => {
+  test("edit an existing record @webTables", async () => {
     const newAge = userFactory.generateAge();
     const newDepartment = "Engineering";
 
@@ -34,9 +32,9 @@ test.describe("WebTables", () => {
     });
     await webTablesPage.submitForm();
 
-    const row = page.locator(".rt-tr-group").filter({ hasText: "Cierra" });
-    const ageCell = row.locator(".rt-td").nth(2);
-    const departmentCell = row.locator(".rt-td").nth(5);
+    const row = webTablesPage.tableGroup.filter({ hasText: "Cierra" });
+    const ageCell = row.locator("td").nth(2);
+    const departmentCell = row.locator("td").nth(5);
 
     await expect(ageCell).toContainText(newAge.toString());
     await expect(departmentCell).toContainText(newDepartment);
@@ -74,21 +72,18 @@ test.describe("WebTables", () => {
     expect(firstRowData.department).toBe(secondRecordData.department);
   });
 
-  test("change the number of rows displayed @webTables", async ({ page }) => {
+  test("change the number of rows displayed @webTables", async () => {
     const rowsPerPageOptions = [5, 10, 20, 25, 50, 100];
 
     for (const rowsPerPage of rowsPerPageOptions) {
       await webTablesPage.setRowsPerPage(rowsPerPage);
-      const rows = page.locator('.rt-tbody div[role="row"]');
-      const count = await rows.count();
+      const count = await webTablesPage.tableRow.count();
       expect(count).toBeLessThanOrEqual(rowsPerPage);
       await webTablesPage.verifyTotalPages("1");
     }
   });
 
-  test("pagination when more than 5 records exist @webTables", async ({
-    page,
-  }) => {
+  test("pagination when more than 5 records exist @webTables", async () => {
     // Add 3 more users
     for (let i = 0; i < 3; i++) {
       const user = userFactory.generate({
@@ -104,17 +99,16 @@ test.describe("WebTables", () => {
     await webTablesPage.verifyTotalPages("2");
 
     await webTablesPage.goToNextPage();
-    const rows = page.locator('.rt-tbody div[role="row"]:not(.-padRow)');
-    const count = await rows.count();
+    const count = await webTablesPage.tableRowActive.count();
     expect(count).toBeGreaterThanOrEqual(1);
 
-    const user2Row = page.locator(".rt-tr-group").filter({ hasText: "User2" });
+    const user2Row = webTablesPage.tableGroup.filter({ hasText: "User2" });
     await expect(user2Row.first()).toBeVisible();
 
     await webTablesPage.verifyPreviousEnabled();
     await webTablesPage.goToPreviousPage();
 
-    const cierraRow = page.locator(".rt-tr-group").filter({ hasText: "Cierra" });
+    const cierraRow = webTablesPage.tableGroup.filter({ hasText: "Cierra" });
     await expect(cierraRow.first()).toBeVisible();
     await webTablesPage.verifyNextEnabled();
   });

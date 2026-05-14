@@ -1,11 +1,12 @@
 /**
- * Page Object for DemoQA Practice Form page
- * @see https://demoqa.com/automation-practice-form
+ * Page Object for Automation Practice Form helper page
+ * @see https://adrianjiga.github.io/qa/helpers/automation-practice-form/
  */
 export class RegisterFormPage {
   constructor(page) {
     this.page = page;
-    this.url = "/automation-practice-form";
+    this.url =
+      "https://adrianjiga.github.io/qa/helpers/automation-practice-form/";
 
     this.firstName = page.locator("#firstName");
     this.lastName = page.locator("#lastName");
@@ -14,9 +15,12 @@ export class RegisterFormPage {
     this.genderMale = page.locator("#gender-radio-1");
     this.genderFemale = page.locator("#gender-radio-2");
     this.genderOther = page.locator("#gender-radio-3");
+    this.genderMaleLabel = page.locator('label[for="gender-radio-1"]');
+    this.genderFemaleLabel = page.locator('label[for="gender-radio-2"]');
+    this.genderOtherLabel = page.locator('label[for="gender-radio-3"]');
     this.dateOfBirthInput = page.locator("#dateOfBirthInput");
-    this.monthSelect = page.locator(".react-datepicker__month-select");
-    this.yearSelect = page.locator(".react-datepicker__year-select");
+    this.monthSelect = page.locator("#dp-month");
+    this.yearSelect = page.locator("#dp-year");
     this.subjectsInput = page.locator("#subjectsInput");
     this.hobbySports = page.locator("#hobbies-checkbox-1");
     this.hobbyReading = page.locator("#hobbies-checkbox-2");
@@ -26,9 +30,9 @@ export class RegisterFormPage {
     this.stateDropdown = page.locator("#state");
     this.cityDropdown = page.locator("#city");
     this.submitButton = page.locator("#submit");
-    this.closeModalButton = page.locator("#closeLargeModal");
-    this.modalTitle = page.locator("#example-modal-sizes-title-lg");
-    this.resultTable = page.locator("table tbody tr");
+    this.closeModalButton = page.locator('[data-cy="close-modal-btn"]');
+    this.modalTitle = page.locator('[data-cy="modal-title"]');
+    this.resultTable = page.locator("#result-tbody tr");
   }
 
   static messages = {
@@ -73,12 +77,12 @@ export class RegisterFormPage {
    * @param {'male'|'female'|'other'} gender - Gender to select
    */
   async selectGender(gender) {
-    const genderMap = {
-      male: this.genderMale,
-      female: this.genderFemale,
-      other: this.genderOther,
+    const genderLabelMap = {
+      male: this.genderMaleLabel,
+      female: this.genderFemaleLabel,
+      other: this.genderOtherLabel,
     };
-    await genderMap[gender].check({ force: true });
+    await genderLabelMap[gender].click();
     return this;
   }
 
@@ -90,12 +94,9 @@ export class RegisterFormPage {
    */
   async selectDateOfBirth(month, year, day) {
     await this.dateOfBirthInput.click();
-    await this.monthSelect.selectOption(month);
+    await this.monthSelect.selectOption({ label: month });
     await this.yearSelect.selectOption(year);
-    await this.page
-      .locator(`.react-datepicker__day.react-datepicker__day--0${day}`)
-      .first()
-      .click();
+    await this.page.locator(`[data-cy="day-${day}"]`).click();
     return this;
   }
 
@@ -120,7 +121,7 @@ export class RegisterFormPage {
       music: this.hobbyMusic,
     };
     for (const hobby of hobbies) {
-      await hobbyMap[hobby].check({ force: true });
+      await hobbyMap[hobby].check();
     }
     return this;
   }
@@ -135,22 +136,22 @@ export class RegisterFormPage {
   }
 
   /**
-   * Select state from dropdown
-   * @param {number} optionIndex - Index of the state option (0-based)
+   * Select state (country) from dropdown
+   * @param {number} optionIndex - Index of the option (0-based)
    */
   async selectState(optionIndex = 0) {
     await this.stateDropdown.click();
-    await this.page.locator(`#react-select-3-option-${optionIndex}`).click();
+    await this.page.locator(`#state-option-${optionIndex}`).click();
     return this;
   }
 
   /**
    * Select city from dropdown
-   * @param {number} optionIndex - Index of the city option (0-based)
+   * @param {number} optionIndex - Index of the option (0-based)
    */
   async selectCity(optionIndex = 0) {
     await this.cityDropdown.click();
-    await this.page.locator(`#react-select-4-option-${optionIndex}`).click();
+    await this.page.locator(`#city-option-${optionIndex}`).click();
     return this;
   }
 
@@ -158,7 +159,7 @@ export class RegisterFormPage {
    * Submit the form
    */
   async submit() {
-    await this.submitButton.click({ force: true });
+    await this.submitButton.click();
     return this;
   }
 
@@ -166,7 +167,7 @@ export class RegisterFormPage {
    * Close the confirmation modal
    */
   async closeModal() {
-    await this.closeModalButton.click({ force: true });
+    await this.closeModalButton.click();
     return this;
   }
 
@@ -225,7 +226,6 @@ export class RegisterFormPage {
     await this.verifyFieldValidationError(this.lastName);
     await this.verifyFieldValidationError(this.mobile);
 
-    // Gender radio labels
     for (let i = 1; i <= 3; i++) {
       const label = this.page.locator(`label[for="gender-radio-${i}"]`);
       const borderColor = await label.evaluate(

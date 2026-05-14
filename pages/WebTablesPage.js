@@ -1,22 +1,20 @@
 /**
- * Page Object for DemoQA Web Tables page
- * @see https://demoqa.com/webtables
+ * Page Object for Web Tables helper page
+ * @see https://adrianjiga.github.io/qa/helpers/webtables/
  */
 export class WebTablesPage {
   constructor(page) {
     this.page = page;
-    this.url = "/webtables";
+    this.url = "https://adrianjiga.github.io/qa/helpers/webtables/";
 
     this.searchBox = page.locator("#searchBox");
     this.addNewRecordButton = page.locator("#addNewRecordButton");
-    this.tableBody = page.locator(".rt-tbody");
-    this.tableRow = page.locator('.rt-tbody div[role="row"]');
-    this.tableRowActive = page.locator(
-      '.rt-tbody div[role="row"]:not(.-padRow)'
-    );
-    this.tableCell = page.locator(".rt-td");
-    this.tableGroup = page.locator(".rt-tr-group");
-    this.modal = page.locator(".modal-content");
+    this.tableBody = page.locator("#table-body");
+    this.tableRow = page.locator("#table-body tr");
+    this.tableRowActive = page.locator("#table-body tr");
+    this.tableCell = page.locator("#table-body td");
+    this.tableGroup = page.locator("#table-body tr");
+    this.modal = page.locator('[data-cy="registration-modal"]');
     this.modalTitle = page.locator("#registration-form-modal");
     this.firstNameInput = page.locator("#firstName");
     this.lastNameInput = page.locator("#lastName");
@@ -27,17 +25,18 @@ export class WebTablesPage {
     this.submitButton = page.locator("#submit");
     this.rowsPerPageSelect = page.locator('select[aria-label="rows per page"]');
     this.totalPages = page.locator(".-totalPages");
-    this.nextButton = page.locator(".-next");
-    this.previousButton = page.locator(".-previous");
+    this.nextButton = page.locator('[data-cy="next-page-btn"]');
+    this.previousButton = page.locator('[data-cy="prev-page-btn"]');
   }
 
   /**
-   * Navigate to the Web Tables page
+   * Navigate to the Web Tables page and reset persisted state
    */
   async visit() {
     await this.page.goto(this.url);
-    // eslint-disable-next-line playwright/no-networkidle
-    await this.page.waitForLoadState("networkidle");
+    await this.page.evaluate(() => localStorage.clear());
+    await this.page.reload();
+    await this.tableRow.first().waitFor();
     return this;
   }
 
@@ -102,8 +101,8 @@ export class WebTablesPage {
   }
 
   /**
-   * Click the edit button for a specific record
-   * @param {number} recordId - Record ID to edit
+   * Click the edit button for a specific row position (1-based)
+   * @param {number} recordId - Row position to edit
    */
   async openEditModal(recordId) {
     await this.page.locator(`#edit-record-${recordId}`).click();
@@ -112,8 +111,8 @@ export class WebTablesPage {
   }
 
   /**
-   * Delete a specific record
-   * @param {number} recordId - Record ID to delete
+   * Delete a specific row by position (1-based)
+   * @param {number} recordId - Row position to delete
    */
   async deleteRecord(recordId) {
     await this.page.locator(`#delete-record-${recordId}`).click();
@@ -170,42 +169,42 @@ export class WebTablesPage {
     await row.waitFor({ state: "visible" });
 
     if (data.firstName) {
-      const cell = row.locator(".rt-td").nth(0);
+      const cell = row.locator("td").nth(0);
       const text = await cell.textContent();
       if (!text.includes(data.firstName)) {
         throw new Error(`First name "${data.firstName}" not found`);
       }
     }
     if (data.lastName) {
-      const cell = row.locator(".rt-td").nth(1);
+      const cell = row.locator("td").nth(1);
       const text = await cell.textContent();
       if (!text.includes(data.lastName)) {
         throw new Error(`Last name "${data.lastName}" not found`);
       }
     }
     if (data.age) {
-      const cell = row.locator(".rt-td").nth(2);
+      const cell = row.locator("td").nth(2);
       const text = await cell.textContent();
       if (!text.includes(data.age.toString())) {
         throw new Error(`Age "${data.age}" not found`);
       }
     }
     if (data.email) {
-      const cell = row.locator(".rt-td").nth(3);
+      const cell = row.locator("td").nth(3);
       const text = await cell.textContent();
       if (!text.includes(data.email)) {
         throw new Error(`Email "${data.email}" not found`);
       }
     }
     if (data.salary) {
-      const cell = row.locator(".rt-td").nth(4);
+      const cell = row.locator("td").nth(4);
       const text = await cell.textContent();
       if (!text.includes(data.salary.toString())) {
         throw new Error(`Salary "${data.salary}" not found`);
       }
     }
     if (data.department) {
-      const cell = row.locator(".rt-td").nth(5);
+      const cell = row.locator("td").nth(5);
       const text = await cell.textContent();
       if (!text.includes(data.department)) {
         throw new Error(`Department "${data.department}" not found`);
@@ -220,7 +219,7 @@ export class WebTablesPage {
    */
   async verifyRecordActions(identifier) {
     const row = this.tableGroup.filter({ hasText: identifier });
-    const actionsCell = row.locator(".rt-td").nth(6);
+    const actionsCell = row.locator("td").nth(6);
     await actionsCell
       .locator('span[title="Edit"]')
       .waitFor({ state: "visible" });
@@ -271,7 +270,7 @@ export class WebTablesPage {
    * Verify next button is enabled
    */
   async verifyNextEnabled() {
-    const isDisabled = await this.nextButton.locator("button").isDisabled();
+    const isDisabled = await this.nextButton.isDisabled();
     if (isDisabled) {
       throw new Error("Next button should be enabled");
     }
@@ -282,7 +281,7 @@ export class WebTablesPage {
    * Verify previous button is enabled
    */
   async verifyPreviousEnabled() {
-    const isDisabled = await this.previousButton.locator("button").isDisabled();
+    const isDisabled = await this.previousButton.isDisabled();
     if (isDisabled) {
       throw new Error("Previous button should be enabled");
     }
@@ -296,12 +295,12 @@ export class WebTablesPage {
   async getFirstRowData() {
     const row = this.tableRowActive.first();
     return {
-      firstName: await row.locator("div").nth(0).textContent(),
-      lastName: await row.locator("div").nth(1).textContent(),
-      age: await row.locator("div").nth(2).textContent(),
-      email: await row.locator("div").nth(3).textContent(),
-      salary: await row.locator("div").nth(4).textContent(),
-      department: await row.locator("div").nth(5).textContent(),
+      firstName: await row.locator("td").nth(0).textContent(),
+      lastName: await row.locator("td").nth(1).textContent(),
+      age: await row.locator("td").nth(2).textContent(),
+      email: await row.locator("td").nth(3).textContent(),
+      salary: await row.locator("td").nth(4).textContent(),
+      department: await row.locator("td").nth(5).textContent(),
     };
   }
 
@@ -313,12 +312,12 @@ export class WebTablesPage {
   async getRowData(index) {
     const row = this.tableRowActive.nth(index);
     return {
-      firstName: await row.locator("div").nth(0).textContent(),
-      lastName: await row.locator("div").nth(1).textContent(),
-      age: await row.locator("div").nth(2).textContent(),
-      email: await row.locator("div").nth(3).textContent(),
-      salary: await row.locator("div").nth(4).textContent(),
-      department: await row.locator("div").nth(5).textContent(),
+      firstName: await row.locator("td").nth(0).textContent(),
+      lastName: await row.locator("td").nth(1).textContent(),
+      age: await row.locator("td").nth(2).textContent(),
+      email: await row.locator("td").nth(3).textContent(),
+      salary: await row.locator("td").nth(4).textContent(),
+      department: await row.locator("td").nth(5).textContent(),
     };
   }
 }

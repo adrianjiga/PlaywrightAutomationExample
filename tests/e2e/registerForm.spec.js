@@ -13,7 +13,10 @@ test.describe("Register Form", () => {
 
   test("should submit the practice form with all fields @ui", async () => {
     const testUser = userFactory.generateFormUser();
-    const fixturePath = path.join(process.cwd(), "tests/fixtures/book.json");
+    const fixturePath = path.join(
+      process.cwd(),
+      "tests/fixtures/sample-upload.json"
+    );
 
     await registerFormPage.fillCompleteForm({
       firstName: testUser.firstName,
@@ -41,9 +44,9 @@ test.describe("Register Form", () => {
       "Date of Birth": "01 January,1990",
       Subjects: "Maths",
       Hobbies: "Sports, Reading",
-      Picture: "book.json",
+      Picture: "sample-upload.json",
       Address: testUser.address,
-      "State and City": "NCR Delhi",
+      "State and City": "Germany Berlin",
     };
 
     await registerFormPage.verifySubmittedData(expectedData);
