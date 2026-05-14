@@ -83,7 +83,7 @@ All `actions/*` references are **pinned to full commit SHAs** with a trailing `#
 |---|---|
 | `pages/` | Page Object Models. Each PO owns its full URL and any "reset to known state" setup in `visit()`. |
 | `tests/e2e/` | All specs. Test discovery is keyed off `testDir: "./tests/e2e"` in `playwright.config.js`. |
-| `tests/fixtures/` | Static JSON fixtures. `book.json` is currently orphaned (the suite that consumed it was removed); safe to delete if cleanup comes up. |
+| `tests/fixtures/` | Static fixtures. `sample-upload.json` is read by the Register Form spec as the picture-upload payload — the helper page accepts any file and echoes its basename back in the result table, which is what the assertion verifies. |
 | `utils/factories.js` | Faker-based test data generators. |
 | `reports/` | JSON + JUnit + HTML reporter output. HTML lands in `reports/html` (note: `npm run report` uses Playwright's default `playwright-report/` — `report:open` is the one that hits `reports/html`). |
 | `test-results/` | Per-test trace, screenshot, and video artifacts. |
