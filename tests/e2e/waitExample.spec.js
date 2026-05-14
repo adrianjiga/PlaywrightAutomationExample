@@ -1,6 +1,11 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Test Cypress Docs with waitUntil equivalent", () => {
+  test.skip(
+    ({ viewport }) => !!viewport && viewport.width < 768,
+    "Cypress docs hides the search button behind a hamburger menu on narrow viewports"
+  );
+
   test("Waits for the search button to be visible and clicks it @ui", async ({
     page,
   }) => {
