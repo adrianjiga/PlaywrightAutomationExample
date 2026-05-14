@@ -34,7 +34,7 @@ npx playwright install
 ```
 ├── tests/
 │   ├── e2e/                          # Test specifications
-│   │   ├── api.spec.js               # Book Store API tests
+│   │   ├── api.spec.js               # JSONPlaceholder API tests
 │   │   ├── buttons.spec.js           # Button interaction tests
 │   │   ├── registerForm.spec.js      # Form validation tests
 │   │   ├── waitExample.spec.js       # Custom wait patterns
@@ -185,21 +185,6 @@ const formUser = userFactory.generateFormUser();
 
 const users = userFactory.generateBatch(5);
 // Array of 5 user objects
-```
-
-## API Helpers
-
-```javascript
-import { API_CONFIG, validateBookSchema, validateResponse } from "../../utils/apiHelpers.js";
-
-// Make API request
-const response = await request.get(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.books}`);
-
-// Validate response
-await validateResponse(response, expect, 200);
-
-// Validate schema
-validateBookSchema(book, expect);
 ```
 
 ## Configuration
