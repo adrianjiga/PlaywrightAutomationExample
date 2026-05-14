@@ -12,18 +12,9 @@ on:
         type: choice
         options:
           - prod
-      browser:
-        description: "Browser to run tests in"
-        required: false
-        default: "chromium"
-        type: choice
-        options:
-          - chromium
-          - firefox
-          - webkit
   push:
     branches:
-      - master
+      - main
 
 permissions:
   contents: read
@@ -68,7 +59,7 @@ jobs:
         run: |
           npx playwright test \
             --grep '${{ matrix.group.tag }}' \
-            --project=${{ github.event.inputs.browser || matrix.browser }}
+            --project=${{ matrix.browser }}
         env:
           TEST_ENV: ${{ github.event.inputs.environment || 'prod' }}
 
@@ -91,7 +82,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        viewport: [mobile-chrome, tablet]
+        include:
+          - viewport: mobile-chrome
+            browser: chromium
+          - viewport: tablet
+            browser: webkit
 
     steps:
       - name: Checkout Repository
@@ -107,7 +102,7 @@ jobs:
         run: npm ci
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps ${{ matrix.browser }}
 
       - name: Run UI Tests - ${{ matrix.viewport }}
         run: |
