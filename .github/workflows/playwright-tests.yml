@@ -4,14 +4,6 @@ on:
   schedule:
     - cron: "0 7 * * 1-5" # Every Monday to Friday at 07:00 UTC
   workflow_dispatch:
-    inputs:
-      environment:
-        description: "Environment to run tests against"
-        required: false
-        default: "prod"
-        type: choice
-        options:
-          - prod
   push:
     branches:
       - main
@@ -60,8 +52,6 @@ jobs:
           npx playwright test \
             --grep '${{ matrix.group.tag }}' \
             --project=${{ matrix.browser }}
-        env:
-          TEST_ENV: ${{ github.event.inputs.environment || 'prod' }}
 
       - name: Upload Blob Report
         if: always()

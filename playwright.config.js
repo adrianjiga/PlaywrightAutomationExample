@@ -6,13 +6,6 @@ import { defineConfig, devices } from "@playwright/test";
  * @see https://playwright.dev/docs/test-configuration
  */
 
-const environments = {
-  prod: {
-    baseURL: "https://demoqa.com",
-    apiURL: "https://demoqa.com",
-  },
-};
-
 const viewports = {
   mobile: { width: 375, height: 667 },
   tablet: { width: 768, height: 1024 },
@@ -34,7 +27,6 @@ export default defineConfig({
         ["junit", { outputFile: "reports/junit.xml" }],
       ],
   use: {
-    baseURL: environments[process.env.TEST_ENV || "prod"].baseURL,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
