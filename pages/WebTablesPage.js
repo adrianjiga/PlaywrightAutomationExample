@@ -1,19 +1,42 @@
+import { expect } from "@playwright/test";
+
+/**
+ * @typedef {Object} WebTableRecord
+ * @property {string} [firstName]
+ * @property {string} [lastName]
+ * @property {string} [email]
+ * @property {string|number} [age]
+ * @property {string|number} [salary]
+ * @property {string} [department]
+ */
+
+/**
+ * Row data read back from the rendered table — values come from `textContent()`
+ * and may be `null` if the cell is empty.
+ * @typedef {Object} WebTableRow
+ * @property {string|null} firstName
+ * @property {string|null} lastName
+ * @property {string|null} age
+ * @property {string|null} email
+ * @property {string|null} salary
+ * @property {string|null} department
+ */
+
 /**
  * Page Object for Web Tables helper page
  * @see https://adrianjiga.github.io/qa/helpers/webtables/
  */
 export class WebTablesPage {
+  /**
+   * @param {import('@playwright/test').Page} page
+   */
   constructor(page) {
     this.page = page;
     this.url = "https://adrianjiga.github.io/qa/helpers/webtables/";
 
     this.searchBox = page.locator("#searchBox");
     this.addNewRecordButton = page.locator("#addNewRecordButton");
-    this.tableBody = page.locator("#table-body");
-    this.tableRow = page.locator("#table-body tr");
-    this.tableRowActive = page.locator("#table-body tr");
-    this.tableCell = page.locator("#table-body td");
-    this.tableGroup = page.locator("#table-body tr");
+    this.rows = page.locator("#table-body tr");
     this.modal = page.locator('[data-cy="registration-modal"]');
     this.modalTitle = page.locator("#registration-form-modal");
     this.firstNameInput = page.locator("#firstName");
@@ -36,7 +59,7 @@ export class WebTablesPage {
     await this.page.goto(this.url);
     await this.page.evaluate(() => localStorage.clear());
     await this.page.reload();
-    await this.tableRow.first().waitFor();
+    await this.rows.first().waitFor();
     return this;
   }
 
@@ -62,7 +85,7 @@ export class WebTablesPage {
    * Get all visible (non-empty) rows
    */
   async getVisibleRows() {
-    return this.tableRowActive;
+    return this.rows;
   }
 
   /**
@@ -70,11 +93,7 @@ export class WebTablesPage {
    * @param {number} count - Expected number of rows
    */
   async verifyRowCount(count) {
-    const rows = await this.getVisibleRows();
-    const rowCount = await rows.count();
-    if (rowCount !== count) {
-      throw new Error(`Expected ${count} rows, got ${rowCount}`);
-    }
+    await expect(this.rows).toHaveCount(count);
     return this;
   }
 
@@ -83,11 +102,7 @@ export class WebTablesPage {
    * @param {number} minCount - Minimum expected rows
    */
   async verifyMinRowCount(minCount) {
-    const rows = await this.getVisibleRows();
-    const rowCount = await rows.count();
-    if (rowCount < minCount) {
-      throw new Error(`Expected at least ${minCount} rows, got ${rowCount}`);
-    }
+    await expect.poll(() => this.rows.count()).toBeGreaterThanOrEqual(minCount);
     return this;
   }
 
@@ -121,7 +136,7 @@ export class WebTablesPage {
 
   /**
    * Fill the registration/edit form
-   * @param {Object} data - Form data object
+   * @param {WebTableRecord} data - Form data object
    */
   async fillForm(data) {
     if (data.firstName) {
@@ -162,52 +177,23 @@ export class WebTablesPage {
 
   /**
    * Verify a record exists with specific data
-   * @param {Object} data - Expected data in the row
+   * @param {WebTableRecord} data - Expected data in the row
    */
   async verifyRecordExists(data) {
-    const row = this.tableGroup.filter({ hasText: data.firstName });
-    await row.waitFor({ state: "visible" });
+    const row = this.rows.filter({ hasText: data.firstName });
+    await expect(row).toBeVisible();
 
-    if (data.firstName) {
-      const cell = row.locator("td").nth(0);
-      const text = await cell.textContent();
-      if (!text.includes(data.firstName)) {
-        throw new Error(`First name "${data.firstName}" not found`);
-      }
-    }
-    if (data.lastName) {
-      const cell = row.locator("td").nth(1);
-      const text = await cell.textContent();
-      if (!text.includes(data.lastName)) {
-        throw new Error(`Last name "${data.lastName}" not found`);
-      }
-    }
-    if (data.age) {
-      const cell = row.locator("td").nth(2);
-      const text = await cell.textContent();
-      if (!text.includes(data.age.toString())) {
-        throw new Error(`Age "${data.age}" not found`);
-      }
-    }
-    if (data.email) {
-      const cell = row.locator("td").nth(3);
-      const text = await cell.textContent();
-      if (!text.includes(data.email)) {
-        throw new Error(`Email "${data.email}" not found`);
-      }
-    }
-    if (data.salary) {
-      const cell = row.locator("td").nth(4);
-      const text = await cell.textContent();
-      if (!text.includes(data.salary.toString())) {
-        throw new Error(`Salary "${data.salary}" not found`);
-      }
-    }
-    if (data.department) {
-      const cell = row.locator("td").nth(5);
-      const text = await cell.textContent();
-      if (!text.includes(data.department)) {
-        throw new Error(`Department "${data.department}" not found`);
+    const cells = [
+      data.firstName,
+      data.lastName,
+      data.age?.toString(),
+      data.email,
+      data.salary?.toString(),
+      data.department,
+    ];
+    for (const [index, expected] of cells.entries()) {
+      if (expected !== undefined) {
+        await expect(row.locator("td").nth(index)).toContainText(expected);
       }
     }
     return this;
@@ -218,14 +204,12 @@ export class WebTablesPage {
    * @param {string} identifier - Text to identify the row
    */
   async verifyRecordActions(identifier) {
-    const row = this.tableGroup.filter({ hasText: identifier });
-    const actionsCell = row.locator("td").nth(6);
-    await actionsCell
-      .locator('span[title="Edit"]')
-      .waitFor({ state: "visible" });
-    await actionsCell
-      .locator('span[title="Delete"]')
-      .waitFor({ state: "visible" });
+    const actionsCell = this.rows
+      .filter({ hasText: identifier })
+      .locator("td")
+      .nth(6);
+    await expect(actionsCell.locator('span[title="Edit"]')).toBeVisible();
+    await expect(actionsCell.locator('span[title="Delete"]')).toBeVisible();
     return this;
   }
 
@@ -243,10 +227,7 @@ export class WebTablesPage {
    * @param {string} expectedPages - Expected page count as string
    */
   async verifyTotalPages(expectedPages) {
-    const text = await this.totalPages.textContent();
-    if (!text.includes(expectedPages)) {
-      throw new Error(`Expected "${expectedPages}" pages, got "${text}"`);
-    }
+    await expect(this.totalPages).toContainText(expectedPages);
     return this;
   }
 
@@ -270,10 +251,7 @@ export class WebTablesPage {
    * Verify next button is enabled
    */
   async verifyNextEnabled() {
-    const isDisabled = await this.nextButton.isDisabled();
-    if (isDisabled) {
-      throw new Error("Next button should be enabled");
-    }
+    await expect(this.nextButton).toBeEnabled();
     return this;
   }
 
@@ -281,19 +259,16 @@ export class WebTablesPage {
    * Verify previous button is enabled
    */
   async verifyPreviousEnabled() {
-    const isDisabled = await this.previousButton.isDisabled();
-    if (isDisabled) {
-      throw new Error("Previous button should be enabled");
-    }
+    await expect(this.previousButton).toBeEnabled();
     return this;
   }
 
   /**
    * Get data from the first row
-   * @returns {Promise<Object>}
+   * @returns {Promise<WebTableRow>}
    */
   async getFirstRowData() {
-    const row = this.tableRowActive.first();
+    const row = this.rows.first();
     return {
       firstName: await row.locator("td").nth(0).textContent(),
       lastName: await row.locator("td").nth(1).textContent(),
@@ -307,10 +282,10 @@ export class WebTablesPage {
   /**
    * Get data from a specific row by index
    * @param {number} index - Row index (0-based)
-   * @returns {Promise<Object>}
+   * @returns {Promise<WebTableRow>}
    */
   async getRowData(index) {
-    const row = this.tableRowActive.nth(index);
+    const row = this.rows.nth(index);
     return {
       firstName: await row.locator("td").nth(0).textContent(),
       lastName: await row.locator("td").nth(1).textContent(),

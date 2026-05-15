@@ -3,6 +3,7 @@ import { WebTablesPage } from "../../pages/index.js";
 import { userFactory } from "../../utils/factories.js";
 
 test.describe("WebTables", () => {
+  /** @type {WebTablesPage} */
   let webTablesPage;
 
   test.beforeEach(async ({ page }) => {
@@ -13,10 +14,9 @@ test.describe("WebTables", () => {
   test("search for a record @webTables", async () => {
     await webTablesPage.search("Cierra");
 
-    const row = webTablesPage.tableRow.filter({ hasText: "Cierra" });
+    const row = webTablesPage.rows.filter({ hasText: "Cierra" });
     await expect(row.first()).toBeVisible();
     await webTablesPage.verifyRowCount(1);
-
     await webTablesPage.clearSearch();
     await webTablesPage.verifyMinRowCount(2);
   });
@@ -32,7 +32,7 @@ test.describe("WebTables", () => {
     });
     await webTablesPage.submitForm();
 
-    const row = webTablesPage.tableGroup.filter({ hasText: "Cierra" });
+    const row = webTablesPage.rows.filter({ hasText: "Cierra" });
     const ageCell = row.locator("td").nth(2);
     const departmentCell = row.locator("td").nth(5);
 
@@ -76,7 +76,7 @@ test.describe("WebTables", () => {
 
     for (const rowsPerPage of rowsPerPageOptions) {
       await webTablesPage.setRowsPerPage(rowsPerPage);
-      const count = await webTablesPage.tableRow.count();
+      const count = await webTablesPage.rows.count();
       expect(count).toBeLessThanOrEqual(rowsPerPage);
       await webTablesPage.verifyTotalPages("1");
     }
@@ -98,16 +98,16 @@ test.describe("WebTables", () => {
     await webTablesPage.verifyTotalPages("2");
 
     await webTablesPage.goToNextPage();
-    const count = await webTablesPage.tableRowActive.count();
+    const count = await webTablesPage.rows.count();
     expect(count).toBeGreaterThanOrEqual(1);
 
-    const user2Row = webTablesPage.tableGroup.filter({ hasText: "User2" });
+    const user2Row = webTablesPage.rows.filter({ hasText: "User2" });
     await expect(user2Row.first()).toBeVisible();
 
     await webTablesPage.verifyPreviousEnabled();
     await webTablesPage.goToPreviousPage();
 
-    const cierraRow = webTablesPage.tableGroup.filter({ hasText: "Cierra" });
+    const cierraRow = webTablesPage.rows.filter({ hasText: "Cierra" });
     await expect(cierraRow.first()).toBeVisible();
     await webTablesPage.verifyNextEnabled();
   });

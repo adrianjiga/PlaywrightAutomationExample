@@ -1,102 +1,40 @@
+x-playwright-service: &playwright-service
+  build:
+    context: .
+    dockerfile: Dockerfile
+  volumes:
+    - .:/app
+    - /app/node_modules
+  deploy:
+    resources:
+      limits:
+        memory: 2G
+      reservations:
+        memory: 1G
+  environment:
+    - CI=true
+
 services:
   playwright-tests:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - .:/app
-      - /app/node_modules
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-        reservations:
-          memory: 1G
+    <<: *playwright-service
     command: npx playwright test
-    environment:
-      - CI=true
 
   ui-tests:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - .:/app
-      - /app/node_modules
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-        reservations:
-          memory: 1G
+    <<: *playwright-service
     command: npx playwright test --grep @ui --reporter=html
-    environment:
-      - CI=true
 
   api-tests:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - .:/app
-      - /app/node_modules
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-        reservations:
-          memory: 1G
+    <<: *playwright-service
     command: npx playwright test --grep @api --reporter=html
-    environment:
-      - CI=true
 
   webtables-tests:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - .:/app
-      - /app/node_modules
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-        reservations:
-          memory: 1G
+    <<: *playwright-service
     command: npx playwright test --grep @webTables --reporter=html
-    environment:
-      - CI=true
 
   chromium-tests:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - .:/app
-      - /app/node_modules
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-        reservations:
-          memory: 1G
+    <<: *playwright-service
     command: npx playwright test --project=chromium --reporter=html
-    environment:
-      - CI=true
 
   firefox-tests:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - .:/app
-      - /app/node_modules
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-        reservations:
-          memory: 1G
+    <<: *playwright-service
     command: npx playwright test --project=firefox --reporter=html
-    environment:
-      - CI=true

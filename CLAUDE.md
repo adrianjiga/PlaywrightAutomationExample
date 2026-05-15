@@ -10,7 +10,7 @@ A Playwright reference project demonstrating UI, API, and table-interaction test
 - **`api.spec.js`** targets `jsonplaceholder.typicode.com` (public free API).
 - **`waitExample.spec.js`** targets `docs.cypress.io` to demo wait patterns against a real third-party site.
 
-`playwright.config.js` still defines `baseURL: "https://demoqa.com"`, but the page objects override it with full URLs in their `url` field, so `baseURL` is effectively unused. Don't rely on `page.goto("/")` patterns here.
+`playwright.config.js` does **not** define a `baseURL` — each page object owns its full URL in a `url` field and `visit()` calls `page.goto(this.url)`. Don't rely on `page.goto("/")` patterns here; if you add a spec against a new host, give the page object its own absolute URL.
 
 ## Common commands
 

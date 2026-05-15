@@ -1,8 +1,29 @@
+import { expect } from "@playwright/test";
+
+/**
+ * @typedef {Object} RegisterFormData
+ * @property {string} [firstName]
+ * @property {string} [lastName]
+ * @property {string} [email]
+ * @property {string} [mobile]
+ * @property {string} [address]
+ * @property {'male'|'female'|'other'} [gender]
+ * @property {{ month: string, year: string, day: string }} [dateOfBirth]
+ * @property {string[]} [subjects]
+ * @property {Array<'sports'|'reading'|'music'>} [hobbies]
+ * @property {string} [picture]
+ * @property {number} [state]
+ * @property {number} [city]
+ */
+
 /**
  * Page Object for Automation Practice Form helper page
  * @see https://adrianjiga.github.io/qa/helpers/automation-practice-form/
  */
 export class RegisterFormPage {
+  /**
+   * @param {import('@playwright/test').Page} page
+   */
   constructor(page) {
     this.page = page;
     this.url =
@@ -12,9 +33,6 @@ export class RegisterFormPage {
     this.lastName = page.locator("#lastName");
     this.email = page.locator("#userEmail");
     this.mobile = page.locator("#userNumber");
-    this.genderMale = page.locator("#gender-radio-1");
-    this.genderFemale = page.locator("#gender-radio-2");
-    this.genderOther = page.locator("#gender-radio-3");
     this.genderMaleLabel = page.locator('label[for="gender-radio-1"]');
     this.genderFemaleLabel = page.locator('label[for="gender-radio-2"]');
     this.genderOtherLabel = page.locator('label[for="gender-radio-3"]');
@@ -51,7 +69,7 @@ export class RegisterFormPage {
 
   /**
    * Fill basic text fields
-   * @param {Object} data - Form data
+   * @param {RegisterFormData} data - Form data
    */
   async fillBasicInfo(data) {
     if (data.firstName) {
@@ -175,13 +193,9 @@ export class RegisterFormPage {
    * Verify the confirmation modal is displayed
    */
   async verifySubmissionSuccess() {
-    await this.modalTitle.waitFor({ state: "visible" });
-    const text = await this.modalTitle.textContent();
-    if (!text.includes(RegisterFormPage.messages.formSubmitted)) {
-      throw new Error(
-        `Expected message "${RegisterFormPage.messages.formSubmitted}" not found`
-      );
-    }
+    await expect(this.modalTitle).toContainText(
+      RegisterFormPage.messages.formSubmitted
+    );
     return this;
   }
 
@@ -192,12 +206,7 @@ export class RegisterFormPage {
   async verifySubmittedData(expectedData) {
     for (const [label, value] of Object.entries(expectedData)) {
       const row = this.resultTable.filter({ hasText: label });
-      const valueCell = row.locator("td").nth(1);
-      await valueCell.waitFor({ state: "visible" });
-      const text = await valueCell.textContent();
-      if (text !== value) {
-        throw new Error(`Expected "${value}" for "${label}", got "${text}"`);
-      }
+      await expect(row.locator("td").nth(1)).toHaveText(value);
     }
     return this;
   }
@@ -207,14 +216,10 @@ export class RegisterFormPage {
    * @param {import('@playwright/test').Locator} locator - Field locator
    */
   async verifyFieldValidationError(locator) {
-    const borderColor = await locator.evaluate(
-      (el) => getComputedStyle(el).borderColor
+    await expect(locator).toHaveCSS(
+      "border-color",
+      RegisterFormPage.validationColor
     );
-    if (borderColor !== RegisterFormPage.validationColor) {
-      throw new Error(
-        `Expected border color "${RegisterFormPage.validationColor}", got "${borderColor}"`
-      );
-    }
     return this;
   }
 
@@ -227,22 +232,16 @@ export class RegisterFormPage {
     await this.verifyFieldValidationError(this.mobile);
 
     for (let i = 1; i <= 3; i++) {
-      const label = this.page.locator(`label[for="gender-radio-${i}"]`);
-      const borderColor = await label.evaluate(
-        (el) => getComputedStyle(el).borderColor
-      );
-      if (borderColor !== RegisterFormPage.validationColor) {
-        throw new Error(
-          `Expected border color "${RegisterFormPage.validationColor}" for gender label ${i}`
-        );
-      }
+      await expect(
+        this.page.locator(`label[for="gender-radio-${i}"]`)
+      ).toHaveCSS("border-color", RegisterFormPage.validationColor);
     }
     return this;
   }
 
   /**
    * Fill complete form with all fields
-   * @param {Object} data - Complete form data
+   * @param {RegisterFormData} data - Complete form data
    */
   async fillCompleteForm(data) {
     await this.fillBasicInfo({

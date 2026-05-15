@@ -1,9 +1,10 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 import { RegisterFormPage } from "../../pages/index.js";
 import { userFactory } from "../../utils/factories.js";
 import path from "path";
 
 test.describe("Register Form", () => {
+  /** @type {RegisterFormPage} */
   let registerFormPage;
 
   test.beforeEach(async ({ page }) => {
@@ -55,20 +56,6 @@ test.describe("Register Form", () => {
 
   test("should show validation errors for required fields @ui", async () => {
     await registerFormPage.submit();
-
-    await expect(registerFormPage.firstName).toHaveCSS(
-      "border-color",
-      RegisterFormPage.validationColor
-    );
-    await expect(registerFormPage.lastName).toHaveCSS(
-      "border-color",
-      RegisterFormPage.validationColor
-    );
-    await expect(registerFormPage.mobile).toHaveCSS(
-      "border-color",
-      RegisterFormPage.validationColor
-    );
-
     await registerFormPage.verifyRequiredFieldErrors();
   });
 });

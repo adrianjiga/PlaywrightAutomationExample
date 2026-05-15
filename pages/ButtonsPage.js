@@ -1,8 +1,13 @@
+import { expect } from "@playwright/test";
+
 /**
  * Page Object for Buttons helper page
  * @see https://adrianjiga.github.io/qa/helpers/buttons/
  */
 export class ButtonsPage {
+  /**
+   * @param {import('@playwright/test').Page} page
+   */
   constructor(page) {
     this.page = page;
     this.url = "https://adrianjiga.github.io/qa/helpers/buttons/";
@@ -57,13 +62,9 @@ export class ButtonsPage {
    * Verify double click message is displayed
    */
   async verifyDoubleClickMessage() {
-    await this.doubleClickMessage.waitFor({ state: "visible" });
-    const text = await this.doubleClickMessage.textContent();
-    if (!text.includes(ButtonsPage.messages.doubleClick)) {
-      throw new Error(
-        `Expected message "${ButtonsPage.messages.doubleClick}" not found`
-      );
-    }
+    await expect(this.doubleClickMessage).toContainText(
+      ButtonsPage.messages.doubleClick
+    );
     return this;
   }
 
@@ -71,13 +72,9 @@ export class ButtonsPage {
    * Verify right click message is displayed
    */
   async verifyRightClickMessage() {
-    await this.rightClickMessage.waitFor({ state: "visible" });
-    const text = await this.rightClickMessage.textContent();
-    if (!text.includes(ButtonsPage.messages.rightClick)) {
-      throw new Error(
-        `Expected message "${ButtonsPage.messages.rightClick}" not found`
-      );
-    }
+    await expect(this.rightClickMessage).toContainText(
+      ButtonsPage.messages.rightClick
+    );
     return this;
   }
 
@@ -85,13 +82,9 @@ export class ButtonsPage {
    * Verify dynamic click message is displayed
    */
   async verifyDynamicClickMessage() {
-    await this.dynamicClickMessage.waitFor({ state: "visible" });
-    const text = await this.dynamicClickMessage.textContent();
-    if (!text.includes(ButtonsPage.messages.dynamicClick)) {
-      throw new Error(
-        `Expected message "${ButtonsPage.messages.dynamicClick}" not found`
-      );
-    }
+    await expect(this.dynamicClickMessage).toContainText(
+      ButtonsPage.messages.dynamicClick
+    );
     return this;
   }
 }

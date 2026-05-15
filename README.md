@@ -1,6 +1,6 @@
 # Playwright Automation Example
 
-A production-ready Playwright testing framework demonstrating UI, API, and table interaction testing patterns using the DemoQA website. Features Page Object Model architecture, test data factories, multi-browser support, responsive testing, and CI/CD integration.
+A reference Playwright project demonstrating UI, API, and table-interaction testing. UI specs target self-hosted helper pages at `https://adrianjiga.github.io/qa/helpers/*` (originally migrated from DemoQA), API specs hit `jsonplaceholder.typicode.com`, and `waitExample.spec.js` exercises wait patterns against `docs.cypress.io`. Features Page Object Model architecture, Faker-based test data factories, multi-browser and responsive viewport coverage, and a sharded GitHub Actions pipeline with merged blob reports.
 
 ## Features
 
@@ -8,7 +8,7 @@ A production-ready Playwright testing framework demonstrating UI, API, and table
 - **Test Data Factories** - Dynamic test data generation with Faker.js
 - **Multi-Browser Testing** - Chromium, Firefox, and WebKit support
 - **Responsive Testing** - Mobile, tablet, and desktop viewport configurations
-- **API Testing** - RESTful API validation with schema verification
+- **API Testing** - RESTful CRUD assertions via Playwright's built-in `request` fixture
 - **Docker Support** - Containerized test execution
 - **CI/CD Ready** - GitHub Actions workflows for automated testing
 - **HTML Reports** - Built-in Playwright HTML reports with traces
@@ -40,21 +40,19 @@ npx playwright install
 │   │   ├── waitExample.spec.js       # Custom wait patterns
 │   │   └── webTables.spec.js         # Table CRUD operations
 │   └── fixtures/                     # Test data files
-│       └── book.json
+│       └── sample-upload.json        # Picture-upload payload for the register form
 ├── pages/                            # Page Object Models
 │   ├── ButtonsPage.js
 │   ├── RegisterFormPage.js
 │   ├── WebTablesPage.js
 │   └── index.js
 ├── utils/
-│   ├── apiHelpers.js                 # API testing utilities
-│   ├── factories.js                  # Test data factories
+│   ├── factories.js                  # Faker-based test data factories
 │   └── index.js
 ├── .github/
 │   ├── workflows/
 │   │   ├── ci.yml                    # PR validation workflow
-│   │   └── playwright-tests.yml      # Main test execution workflow
-│   ├── CODEOWNERS
+│   │   └── playwright-tests.yml      # Scheduled + on-push workflow with sharded matrix
 │   └── dependabot.yml
 ├── playwright.config.js              # Playwright configuration
 ├── docker-compose.yml                # Docker services
@@ -129,22 +127,22 @@ npm run docker:clean
 
 ### UI Tests (`@ui`)
 
-| Test File | Coverage |
-|-----------|----------|
-| `buttons.spec.js` | Double click, right click, dynamic click interactions |
-| `registerForm.spec.js` | Form validation, field errors, complete submission |
-| `waitExample.spec.js` | Built-in waiting patterns and polling |
+| Test File              | Coverage                                              |
+| ---------------------- | ----------------------------------------------------- |
+| `buttons.spec.js`      | Double click, right click, dynamic click interactions |
+| `registerForm.spec.js` | Form validation, field errors, complete submission    |
+| `waitExample.spec.js`  | Built-in waiting patterns and polling                 |
 
 ### API Tests (`@api`)
 
-| Test File | Coverage |
-|-----------|----------|
-| `api.spec.js` | Book Store API - list books, fetch by ISBN, error handling, CRUD operations |
+| Test File     | Coverage                                                                        |
+| ------------- | ------------------------------------------------------------------------------- |
+| `api.spec.js` | JSONPlaceholder CRUD — GET a todo, POST a new post, PUT to update, DELETE by id |
 
 ### Web Tables Tests (`@webTables`)
 
-| Test File | Coverage |
-|-----------|----------|
+| Test File           | Coverage                                                     |
+| ------------------- | ------------------------------------------------------------ |
 | `webTables.spec.js` | Search, edit, add, delete records, pagination, rows per page |
 
 ## Page Objects
@@ -189,52 +187,44 @@ const users = userFactory.generateBatch(5);
 
 ## Configuration
 
-### Environment Configuration
+### Page-Owned URLs
 
-```javascript
-// playwright.config.js
-const environments = {
-  prod: {
-    baseURL: "https://demoqa.com",
-    apiURL: "https://demoqa.com",
-  },
-};
-```
+There is no top-level `baseURL` in `playwright.config.js`. Each page object owns its full URL in a `url` field and `visit()` calls `page.goto(this.url)`. To target a new host, give the page object its own absolute URL — don't rely on `page.goto("/")` patterns.
 
 ### Viewport Presets
 
-| Name | Dimensions |
-|------|------------|
-| mobile | 375 x 667 |
-| tablet | 768 x 1024 |
+| Name    | Dimensions  |
+| ------- | ----------- |
+| mobile  | 375 x 667   |
+| tablet  | 768 x 1024  |
 | desktop | 1920 x 1080 |
 
 ### Test Retries
 
-- CI mode: 2 retries
-- Local mode: 0 retries
+- `retries: 2` is set unconditionally in `playwright.config.js`. CI additionally forces `workers: 1` for deterministic ordering; locally workers default to the Playwright auto-pick.
 
 ## CI/CD
 
 ### Pull Request Validation (`ci.yml`)
 
-Runs on every PR to master:
+Runs on every PR to `main`:
+
 - Linting
 - Format checking
-- Smoke tests
+- Smoke tests (chromium only)
 
 ### Scheduled Test Execution (`playwright-tests.yml`)
 
-- **Schedule**: Monday-Friday at 07:00 UTC
-- **Triggers**: Push to master, manual dispatch
-- **Matrix**: 
-  - Groups: API, UI, WebTables
-  - Browsers: Chromium, Firefox
-  - Viewports: Desktop, Mobile, Tablet
+- **Schedule**: Monday–Friday at 07:00 UTC
+- **Triggers**: Push to `main`, manual dispatch
+- **Main matrix**: Groups (`@api`, `@ui`, `@webTables`) × Browsers (`chromium`, `firefox`), with `@api` skipped on firefox.
+- **Responsive matrix**: `mobile-chrome` (chromium) and `tablet` (webkit), running `@ui` only. The `include:` form pairs each viewport with the browser it needs to install.
+- **Merge step**: Each shard uploads a blob report; a downstream `merge-reports` job merges them via `playwright.merge.config.js`.
 
 ### Artifacts
 
 Test artifacts are retained for 30 days:
+
 - Screenshots (on failure)
 - Videos (on failure only)
 - Traces (on first retry)
@@ -256,12 +246,16 @@ npx playwright show-report
 
 ### Report Locations
 
-| Type | Directory |
-|------|-----------|
-| HTML | `playwright-report/` |
-| JSON | `reports/results.json` |
-| JUnit | `reports/junit.xml` |
-| Traces | `test-results/` |
+Local runs (config defaults):
+
+| Type                          | Path                                              |
+| ----------------------------- | ------------------------------------------------- |
+| HTML                          | `reports/html/` (open with `npm run report:open`) |
+| JSON                          | `reports/results.json`                            |
+| JUnit                         | `reports/junit.xml`                               |
+| Traces / screenshots / videos | `test-results/`                                   |
+
+CI runs use `list` + `blob` + the GitHub Actions reporter; blob reports are merged into `reports/final/` by the downstream `merge-reports` job.
 
 ## Code Quality
 
@@ -288,13 +282,15 @@ npm run typecheck     # Run TypeScript checks
 ## Docker Configuration
 
 Each test container runs with:
-- Base image: `mcr.microsoft.com/playwright:v1.49.1-noble`
+
+- Base image: `mcr.microsoft.com/playwright:v1.60.0-noble` (kept in lockstep with the `@playwright/test` npm dep)
 - Memory limit: 2GB
 - Memory reservation: 1GB
 
 ## Dependency Management
 
 Dependabot monitors and updates:
+
 - npm packages (weekly, Mondays)
 - Docker images (weekly, Mondays)
 - GitHub Actions (weekly, Mondays)
@@ -334,15 +330,15 @@ npm run docker:clean   # Remove Docker volumes and orphans
 
 ## Comparison with Cypress
 
-| Feature | Playwright | Cypress |
-|---------|------------|---------|
-| Multi-browser | Chromium, Firefox, WebKit | Chrome, Firefox, Edge |
-| Parallel execution | Built-in | Requires Dashboard |
-| API testing | Native support | Plugin required |
-| Mobile emulation | Built-in | Limited |
-| Auto-waiting | Built-in | Built-in |
-| Trace viewer | Built-in | Video only |
-| Language support | JS, TS, Python, .NET, Java | JS, TS |
+| Feature            | Playwright                 | Cypress               |
+| ------------------ | -------------------------- | --------------------- |
+| Multi-browser      | Chromium, Firefox, WebKit  | Chrome, Firefox, Edge |
+| Parallel execution | Built-in                   | Requires Dashboard    |
+| API testing        | Native support             | Plugin required       |
+| Mobile emulation   | Built-in                   | Limited               |
+| Auto-waiting       | Built-in                   | Built-in              |
+| Trace viewer       | Built-in                   | Video only            |
+| Language support   | JS, TS, Python, .NET, Java | JS, TS                |
 
 ## Author
 
