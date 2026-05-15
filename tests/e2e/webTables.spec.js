@@ -52,16 +52,15 @@ test.describe("WebTables", () => {
   });
 
   test("delete an existing record @webTables", async () => {
-    const visibleRows = await webTablesPage.getVisibleRows();
-    const initialRowCount = await visibleRows.count();
+    const initialRows = await webTablesPage.getVisibleRows();
+    const initialRowCount = await initialRows.count();
 
     const secondRecordData = await webTablesPage.getRowData(1);
 
     await webTablesPage.deleteRecord(1);
 
     const rowsAfterDelete = await webTablesPage.getVisibleRows();
-    const newRowCount = await rowsAfterDelete.count();
-    expect(newRowCount).toBe(initialRowCount - 1);
+    await expect(rowsAfterDelete).toHaveCount(initialRowCount - 1);
 
     const firstRowData = await webTablesPage.getFirstRowData();
     expect(firstRowData.firstName).toBe(secondRecordData.firstName);

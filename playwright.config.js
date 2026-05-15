@@ -25,12 +25,14 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: 2,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [
-    ["list"],
-    ["html", { outputFolder: "reports/html", open: "never" }],
-    ["json", { outputFile: "reports/results.json" }],
-    ["junit", { outputFile: "reports/junit.xml" }],
-  ],
+  reporter: process.env.CI
+    ? [["list"], ["blob"], ["@estruyf/github-actions-reporter"]]
+    : [
+        ["list"],
+        ["html", { outputFolder: "reports/html", open: "never" }],
+        ["json", { outputFile: "reports/results.json" }],
+        ["junit", { outputFile: "reports/junit.xml" }],
+      ],
   use: {
     baseURL: environments[process.env.TEST_ENV || "prod"].baseURL,
     trace: "on-first-retry",

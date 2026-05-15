@@ -43,6 +43,10 @@ export default [
       "playwright/no-focused-test": "error",
       "playwright/no-skipped-test": "warn",
       "playwright/valid-expect": "error",
+      "playwright/expect-expect": [
+        "warn",
+        { assertFunctionPatterns: ["^verify"] },
+      ],
     },
   },
   prettier,

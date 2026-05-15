@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Test Cypress Docs with waitUntil equivalent", () => {
+  // eslint-disable-next-line playwright/no-skipped-test -- intentional viewport gate, see CLAUDE.md
   test.skip(
     ({ viewport }) => !!viewport && viewport.width < 768,
     "Cypress docs hides the search button behind a hamburger menu on narrow viewports"
@@ -42,6 +43,9 @@ test.describe("Test Cypress Docs with waitUntil equivalent", () => {
     await expect(page.locator("#docsearch-input")).toBeVisible();
   });
 
+  // This test exists to demonstrate the legacy waitForSelector + page.click
+  // pattern alongside the modern locator approaches above.
+  /* eslint-disable playwright/no-wait-for-selector, playwright/prefer-locator */
   test("Using waitForSelector for dynamic content @ui", async ({ page }) => {
     await page.goto("https://docs.cypress.io");
 
@@ -59,4 +63,5 @@ test.describe("Test Cypress Docs with waitUntil equivalent", () => {
 
     await expect(page.locator("#docsearch-input")).toBeVisible();
   });
+  /* eslint-enable playwright/no-wait-for-selector, playwright/prefer-locator */
 });
