@@ -12,9 +12,6 @@ export class RegisterFormPage {
     this.lastName = page.locator("#lastName");
     this.email = page.locator("#userEmail");
     this.mobile = page.locator("#userNumber");
-    this.genderMale = page.locator("#gender-radio-1");
-    this.genderFemale = page.locator("#gender-radio-2");
-    this.genderOther = page.locator("#gender-radio-3");
     this.genderMaleLabel = page.locator('label[for="gender-radio-1"]');
     this.genderFemaleLabel = page.locator('label[for="gender-radio-2"]');
     this.genderOtherLabel = page.locator('label[for="gender-radio-3"]');

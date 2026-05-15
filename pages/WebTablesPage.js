@@ -9,11 +9,7 @@ export class WebTablesPage {
 
     this.searchBox = page.locator("#searchBox");
     this.addNewRecordButton = page.locator("#addNewRecordButton");
-    this.tableBody = page.locator("#table-body");
-    this.tableRow = page.locator("#table-body tr");
-    this.tableRowActive = page.locator("#table-body tr");
-    this.tableCell = page.locator("#table-body td");
-    this.tableGroup = page.locator("#table-body tr");
+    this.rows = page.locator("#table-body tr");
     this.modal = page.locator('[data-cy="registration-modal"]');
     this.modalTitle = page.locator("#registration-form-modal");
     this.firstNameInput = page.locator("#firstName");
@@ -36,7 +32,7 @@ export class WebTablesPage {
     await this.page.goto(this.url);
     await this.page.evaluate(() => localStorage.clear());
     await this.page.reload();
-    await this.tableRow.first().waitFor();
+    await this.rows.first().waitFor();
     return this;
   }
 
@@ -62,7 +58,7 @@ export class WebTablesPage {
    * Get all visible (non-empty) rows
    */
   async getVisibleRows() {
-    return this.tableRowActive;
+    return this.rows;
   }
 
   /**
@@ -165,7 +161,7 @@ export class WebTablesPage {
    * @param {Object} data - Expected data in the row
    */
   async verifyRecordExists(data) {
-    const row = this.tableGroup.filter({ hasText: data.firstName });
+    const row = this.rows.filter({ hasText: data.firstName });
     await row.waitFor({ state: "visible" });
 
     if (data.firstName) {
@@ -218,7 +214,7 @@ export class WebTablesPage {
    * @param {string} identifier - Text to identify the row
    */
   async verifyRecordActions(identifier) {
-    const row = this.tableGroup.filter({ hasText: identifier });
+    const row = this.rows.filter({ hasText: identifier });
     const actionsCell = row.locator("td").nth(6);
     await actionsCell
       .locator('span[title="Edit"]')
@@ -293,7 +289,7 @@ export class WebTablesPage {
    * @returns {Promise<Object>}
    */
   async getFirstRowData() {
-    const row = this.tableRowActive.first();
+    const row = this.rows.first();
     return {
       firstName: await row.locator("td").nth(0).textContent(),
       lastName: await row.locator("td").nth(1).textContent(),
@@ -310,7 +306,7 @@ export class WebTablesPage {
    * @returns {Promise<Object>}
    */
   async getRowData(index) {
-    const row = this.tableRowActive.nth(index);
+    const row = this.rows.nth(index);
     return {
       firstName: await row.locator("td").nth(0).textContent(),
       lastName: await row.locator("td").nth(1).textContent(),
