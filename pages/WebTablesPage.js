@@ -1,3 +1,5 @@
+import { expect } from "@playwright/test";
+
 /**
  * Page Object for Web Tables helper page
  * @see https://adrianjiga.github.io/qa/helpers/webtables/
@@ -66,11 +68,7 @@ export class WebTablesPage {
    * @param {number} count - Expected number of rows
    */
   async verifyRowCount(count) {
-    const rows = await this.getVisibleRows();
-    const rowCount = await rows.count();
-    if (rowCount !== count) {
-      throw new Error(`Expected ${count} rows, got ${rowCount}`);
-    }
+    await expect(this.rows).toHaveCount(count);
     return this;
   }
 
@@ -79,11 +77,7 @@ export class WebTablesPage {
    * @param {number} minCount - Minimum expected rows
    */
   async verifyMinRowCount(minCount) {
-    const rows = await this.getVisibleRows();
-    const rowCount = await rows.count();
-    if (rowCount < minCount) {
-      throw new Error(`Expected at least ${minCount} rows, got ${rowCount}`);
-    }
+    await expect.poll(() => this.rows.count()).toBeGreaterThanOrEqual(minCount);
     return this;
   }
 
@@ -162,48 +156,19 @@ export class WebTablesPage {
    */
   async verifyRecordExists(data) {
     const row = this.rows.filter({ hasText: data.firstName });
-    await row.waitFor({ state: "visible" });
+    await expect(row).toBeVisible();
 
-    if (data.firstName) {
-      const cell = row.locator("td").nth(0);
-      const text = await cell.textContent();
-      if (!text.includes(data.firstName)) {
-        throw new Error(`First name "${data.firstName}" not found`);
-      }
-    }
-    if (data.lastName) {
-      const cell = row.locator("td").nth(1);
-      const text = await cell.textContent();
-      if (!text.includes(data.lastName)) {
-        throw new Error(`Last name "${data.lastName}" not found`);
-      }
-    }
-    if (data.age) {
-      const cell = row.locator("td").nth(2);
-      const text = await cell.textContent();
-      if (!text.includes(data.age.toString())) {
-        throw new Error(`Age "${data.age}" not found`);
-      }
-    }
-    if (data.email) {
-      const cell = row.locator("td").nth(3);
-      const text = await cell.textContent();
-      if (!text.includes(data.email)) {
-        throw new Error(`Email "${data.email}" not found`);
-      }
-    }
-    if (data.salary) {
-      const cell = row.locator("td").nth(4);
-      const text = await cell.textContent();
-      if (!text.includes(data.salary.toString())) {
-        throw new Error(`Salary "${data.salary}" not found`);
-      }
-    }
-    if (data.department) {
-      const cell = row.locator("td").nth(5);
-      const text = await cell.textContent();
-      if (!text.includes(data.department)) {
-        throw new Error(`Department "${data.department}" not found`);
+    const cells = [
+      data.firstName,
+      data.lastName,
+      data.age?.toString(),
+      data.email,
+      data.salary?.toString(),
+      data.department,
+    ];
+    for (const [index, expected] of cells.entries()) {
+      if (expected !== undefined) {
+        await expect(row.locator("td").nth(index)).toContainText(expected);
       }
     }
     return this;
@@ -214,14 +179,12 @@ export class WebTablesPage {
    * @param {string} identifier - Text to identify the row
    */
   async verifyRecordActions(identifier) {
-    const row = this.rows.filter({ hasText: identifier });
-    const actionsCell = row.locator("td").nth(6);
-    await actionsCell
-      .locator('span[title="Edit"]')
-      .waitFor({ state: "visible" });
-    await actionsCell
-      .locator('span[title="Delete"]')
-      .waitFor({ state: "visible" });
+    const actionsCell = this.rows
+      .filter({ hasText: identifier })
+      .locator("td")
+      .nth(6);
+    await expect(actionsCell.locator('span[title="Edit"]')).toBeVisible();
+    await expect(actionsCell.locator('span[title="Delete"]')).toBeVisible();
     return this;
   }
 
@@ -239,10 +202,7 @@ export class WebTablesPage {
    * @param {string} expectedPages - Expected page count as string
    */
   async verifyTotalPages(expectedPages) {
-    const text = await this.totalPages.textContent();
-    if (!text.includes(expectedPages)) {
-      throw new Error(`Expected "${expectedPages}" pages, got "${text}"`);
-    }
+    await expect(this.totalPages).toContainText(expectedPages);
     return this;
   }
 
@@ -266,10 +226,7 @@ export class WebTablesPage {
    * Verify next button is enabled
    */
   async verifyNextEnabled() {
-    const isDisabled = await this.nextButton.isDisabled();
-    if (isDisabled) {
-      throw new Error("Next button should be enabled");
-    }
+    await expect(this.nextButton).toBeEnabled();
     return this;
   }
 
@@ -277,10 +234,7 @@ export class WebTablesPage {
    * Verify previous button is enabled
    */
   async verifyPreviousEnabled() {
-    const isDisabled = await this.previousButton.isDisabled();
-    if (isDisabled) {
-      throw new Error("Previous button should be enabled");
-    }
+    await expect(this.previousButton).toBeEnabled();
     return this;
   }
 

@@ -1,3 +1,5 @@
+import { expect } from "@playwright/test";
+
 /**
  * Page Object for Automation Practice Form helper page
  * @see https://adrianjiga.github.io/qa/helpers/automation-practice-form/
@@ -172,13 +174,9 @@ export class RegisterFormPage {
    * Verify the confirmation modal is displayed
    */
   async verifySubmissionSuccess() {
-    await this.modalTitle.waitFor({ state: "visible" });
-    const text = await this.modalTitle.textContent();
-    if (!text.includes(RegisterFormPage.messages.formSubmitted)) {
-      throw new Error(
-        `Expected message "${RegisterFormPage.messages.formSubmitted}" not found`
-      );
-    }
+    await expect(this.modalTitle).toContainText(
+      RegisterFormPage.messages.formSubmitted
+    );
     return this;
   }
 
@@ -189,12 +187,7 @@ export class RegisterFormPage {
   async verifySubmittedData(expectedData) {
     for (const [label, value] of Object.entries(expectedData)) {
       const row = this.resultTable.filter({ hasText: label });
-      const valueCell = row.locator("td").nth(1);
-      await valueCell.waitFor({ state: "visible" });
-      const text = await valueCell.textContent();
-      if (text !== value) {
-        throw new Error(`Expected "${value}" for "${label}", got "${text}"`);
-      }
+      await expect(row.locator("td").nth(1)).toHaveText(value);
     }
     return this;
   }
@@ -204,14 +197,10 @@ export class RegisterFormPage {
    * @param {import('@playwright/test').Locator} locator - Field locator
    */
   async verifyFieldValidationError(locator) {
-    const borderColor = await locator.evaluate(
-      (el) => getComputedStyle(el).borderColor
+    await expect(locator).toHaveCSS(
+      "border-color",
+      RegisterFormPage.validationColor
     );
-    if (borderColor !== RegisterFormPage.validationColor) {
-      throw new Error(
-        `Expected border color "${RegisterFormPage.validationColor}", got "${borderColor}"`
-      );
-    }
     return this;
   }
 
@@ -224,15 +213,9 @@ export class RegisterFormPage {
     await this.verifyFieldValidationError(this.mobile);
 
     for (let i = 1; i <= 3; i++) {
-      const label = this.page.locator(`label[for="gender-radio-${i}"]`);
-      const borderColor = await label.evaluate(
-        (el) => getComputedStyle(el).borderColor
-      );
-      if (borderColor !== RegisterFormPage.validationColor) {
-        throw new Error(
-          `Expected border color "${RegisterFormPage.validationColor}" for gender label ${i}`
-        );
-      }
+      await expect(
+        this.page.locator(`label[for="gender-radio-${i}"]`)
+      ).toHaveCSS("border-color", RegisterFormPage.validationColor);
     }
     return this;
   }
