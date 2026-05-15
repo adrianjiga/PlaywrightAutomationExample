@@ -5,6 +5,9 @@ import { expect } from "@playwright/test";
  * @see https://adrianjiga.github.io/qa/helpers/buttons/
  */
 export class ButtonsPage {
+  /**
+   * @param {import('@playwright/test').Page} page
+   */
   constructor(page) {
     this.page = page;
     this.url = "https://adrianjiga.github.io/qa/helpers/buttons/";

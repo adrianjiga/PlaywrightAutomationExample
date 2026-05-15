@@ -4,6 +4,7 @@ import { userFactory } from "../../utils/factories.js";
 import path from "path";
 
 test.describe("Register Form", () => {
+  /** @type {RegisterFormPage} */
   let registerFormPage;
 
   test.beforeEach(async ({ page }) => {

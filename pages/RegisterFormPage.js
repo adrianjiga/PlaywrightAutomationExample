@@ -1,10 +1,29 @@
 import { expect } from "@playwright/test";
 
 /**
+ * @typedef {Object} RegisterFormData
+ * @property {string} [firstName]
+ * @property {string} [lastName]
+ * @property {string} [email]
+ * @property {string} [mobile]
+ * @property {string} [address]
+ * @property {'male'|'female'|'other'} [gender]
+ * @property {{ month: string, year: string, day: string }} [dateOfBirth]
+ * @property {string[]} [subjects]
+ * @property {Array<'sports'|'reading'|'music'>} [hobbies]
+ * @property {string} [picture]
+ * @property {number} [state]
+ * @property {number} [city]
+ */
+
+/**
  * Page Object for Automation Practice Form helper page
  * @see https://adrianjiga.github.io/qa/helpers/automation-practice-form/
  */
 export class RegisterFormPage {
+  /**
+   * @param {import('@playwright/test').Page} page
+   */
   constructor(page) {
     this.page = page;
     this.url =
@@ -50,7 +69,7 @@ export class RegisterFormPage {
 
   /**
    * Fill basic text fields
-   * @param {Object} data - Form data
+   * @param {RegisterFormData} data - Form data
    */
   async fillBasicInfo(data) {
     if (data.firstName) {
@@ -222,7 +241,7 @@ export class RegisterFormPage {
 
   /**
    * Fill complete form with all fields
-   * @param {Object} data - Complete form data
+   * @param {RegisterFormData} data - Complete form data
    */
   async fillCompleteForm(data) {
     await this.fillBasicInfo({

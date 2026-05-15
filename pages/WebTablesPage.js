@@ -1,10 +1,35 @@
 import { expect } from "@playwright/test";
 
 /**
+ * @typedef {Object} WebTableRecord
+ * @property {string} [firstName]
+ * @property {string} [lastName]
+ * @property {string} [email]
+ * @property {string|number} [age]
+ * @property {string|number} [salary]
+ * @property {string} [department]
+ */
+
+/**
+ * Row data read back from the rendered table — values come from `textContent()`
+ * and may be `null` if the cell is empty.
+ * @typedef {Object} WebTableRow
+ * @property {string|null} firstName
+ * @property {string|null} lastName
+ * @property {string|null} age
+ * @property {string|null} email
+ * @property {string|null} salary
+ * @property {string|null} department
+ */
+
+/**
  * Page Object for Web Tables helper page
  * @see https://adrianjiga.github.io/qa/helpers/webtables/
  */
 export class WebTablesPage {
+  /**
+   * @param {import('@playwright/test').Page} page
+   */
   constructor(page) {
     this.page = page;
     this.url = "https://adrianjiga.github.io/qa/helpers/webtables/";
@@ -111,7 +136,7 @@ export class WebTablesPage {
 
   /**
    * Fill the registration/edit form
-   * @param {Object} data - Form data object
+   * @param {WebTableRecord} data - Form data object
    */
   async fillForm(data) {
     if (data.firstName) {
@@ -152,7 +177,7 @@ export class WebTablesPage {
 
   /**
    * Verify a record exists with specific data
-   * @param {Object} data - Expected data in the row
+   * @param {WebTableRecord} data - Expected data in the row
    */
   async verifyRecordExists(data) {
     const row = this.rows.filter({ hasText: data.firstName });
@@ -240,7 +265,7 @@ export class WebTablesPage {
 
   /**
    * Get data from the first row
-   * @returns {Promise<Object>}
+   * @returns {Promise<WebTableRow>}
    */
   async getFirstRowData() {
     const row = this.rows.first();
@@ -257,7 +282,7 @@ export class WebTablesPage {
   /**
    * Get data from a specific row by index
    * @param {number} index - Row index (0-based)
-   * @returns {Promise<Object>}
+   * @returns {Promise<WebTableRow>}
    */
   async getRowData(index) {
     const row = this.rows.nth(index);

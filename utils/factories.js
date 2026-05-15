@@ -1,14 +1,33 @@
 import { faker } from "@faker-js/faker";
 
 /**
+ * @typedef {Object} WebTableUser
+ * @property {string} firstName
+ * @property {string} lastName
+ * @property {string} email
+ * @property {string} age
+ * @property {string} salary
+ * @property {string} department
+ */
+
+/**
+ * @typedef {Object} FormUser
+ * @property {string} firstName
+ * @property {string} lastName
+ * @property {string} email
+ * @property {string} mobile
+ * @property {string} address
+ */
+
+/**
  * Factory for generating test user data
  * Provides randomized but valid test data for forms and tables
  */
 export const userFactory = {
   /**
    * Generate a complete user object for WebTables
-   * @param {Object} overrides - Fields to override with specific values
-   * @returns {Object} User data object
+   * @param {Partial<WebTableUser>} [overrides] - Fields to override with specific values
+   * @returns {WebTableUser} User data object
    */
   generate(overrides = {}) {
     return {
@@ -24,8 +43,8 @@ export const userFactory = {
 
   /**
    * Generate user data for the practice registration form
-   * @param {Object} overrides - Fields to override
-   * @returns {Object} Form user data
+   * @param {Partial<FormUser>} [overrides] - Fields to override
+   * @returns {FormUser} Form user data
    */
   generateFormUser(overrides = {}) {
     return {
@@ -40,8 +59,8 @@ export const userFactory = {
 
   /**
    * Generate a random age within working range
-   * @param {number} min - Minimum age (default: 18)
-   * @param {number} max - Maximum age (default: 65)
+   * @param {number} [min] - Minimum age (default: 18)
+   * @param {number} [max] - Maximum age (default: 65)
    * @returns {number} Random age
    */
   generateAge(min = 18, max = 65) {
@@ -51,8 +70,8 @@ export const userFactory = {
   /**
    * Generate a batch of users
    * @param {number} count - Number of users to generate
-   * @param {Object} commonOverrides - Overrides to apply to all users
-   * @returns {Array<Object>} Array of user objects
+   * @param {Partial<WebTableUser>} [commonOverrides] - Overrides to apply to all users
+   * @returns {WebTableUser[]} Array of user objects
    */
   generateBatch(count, commonOverrides = {}) {
     return Array.from({ length: count }, (_, index) =>

@@ -3,6 +3,7 @@ import { WebTablesPage } from "../../pages/index.js";
 import { userFactory } from "../../utils/factories.js";
 
 test.describe("WebTables", () => {
+  /** @type {WebTablesPage} */
   let webTablesPage;
 
   test.beforeEach(async ({ page }) => {
@@ -16,7 +17,6 @@ test.describe("WebTables", () => {
     const row = webTablesPage.rows.filter({ hasText: "Cierra" });
     await expect(row.first()).toBeVisible();
     await webTablesPage.verifyRowCount(1);
-
     await webTablesPage.clearSearch();
     await webTablesPage.verifyMinRowCount(2);
   });
