@@ -46,7 +46,7 @@ Page objects in `pages/` follow a chainable convention: every action method retu
 
 ### Test tags
 
-Specs are tagged in the test title with `@ui`, `@api`, `@webTables`, `@smoke`. The CI matrix and the `test:*` npm scripts both drive off `--grep <tag>`. When adding a new spec, tag it appropriately or it won't be picked up by the scheduled run.
+Specs are tagged in the test title with `@ui`, `@api`, `@webTables`, `@smoke`, `@a11y`. Accessibility specs carry **only** `@a11y` — tagging them `@ui` as well would run them again inside the `@ui` shard and the responsive job. The CI matrix and the `test:*` npm scripts both drive off `--grep <tag>`. When adding a new spec, tag it appropriately or it won't be picked up by the scheduled run.
 
 ### Test data factories
 
@@ -63,6 +63,17 @@ test.skip(({ viewport }) => !!viewport && viewport.width < 768, "reason");
 The `!!viewport &&` guard matters: `viewport` is nullable (a project can run with `viewport: null` for full-window mode), and dereferencing `.width` on null throws inside the skip predicate rather than skipping the test.
 
 ## Non-obvious gotchas
+
+- **The practice form requires a date of birth to submit**, alongside first name, last name,
+  mobile and gender — and it cannot be typed, only picked. Omitting it leaves the form blocked
+  by validation. This bit the accessibility spec: `verifySubmissionSuccess()` originally used
+  only `toContainText`, which does **not** require visibility, so it passed against a modal
+  that never opened. It now asserts `toBeVisible()` first. Any new assertion on a
+  conditionally-shown element needs the same care.
+
+- **Accessibility baselines are two-way.** `expectAccessibilityBaseline` fails on a new issue
+  *and* on a baseline entry that no longer occurs. Fixing the page is therefore expected to
+  turn this suite red until the stale entry is deleted — that is the mechanism, not a bug.
 
 - **Locators here are id-based, and that is legacy, not convention.** Page objects use
   `#firstName`, `#searchBox`, `#submit` and similar — carried over from the DemoQA era. The
@@ -85,8 +96,8 @@ The `!!viewport &&` guard matters: `viewport` is nullable (a project can run wit
 
 Two workflows in `.github/workflows/`:
 
-- `ci.yml` — PR validation against `main`: lint, format check, smoke tests on chromium.
-- `playwright-tests.yml` — scheduled (Mon–Fri 07:00 UTC), on push to `main`, and on `workflow_dispatch`. Sharded matrix: `{api, ui, webTables}` × `{chromium, firefox}` (api skipped on firefox) + responsive jobs for `mobile-chrome` (chromium) and `tablet` (webkit), with a `merge-reports` job downstream. The responsive matrix uses `include:` form so each viewport carries its required browser — the install step keys off `matrix.browser`, so `tablet` installs webkit and `mobile-chrome` installs chromium. If you add a viewport, add its browser to the same matrix entry.
+- `ci.yml` — PR validation against `main`: lint, format check, typecheck, smoke tests on chromium. It uploads `blob-report/`, not `playwright-report/` — the html reporter only runs locally.
+- `playwright-tests.yml` — scheduled (Mon–Fri 07:00 UTC), on push to `main`, and on `workflow_dispatch`. Sharded matrix: `{api, ui, webTables, a11y}` × `{chromium, firefox}` (api and a11y skipped on firefox — a11y inspects the DOM, not rendering, so a second engine adds no signal) + responsive jobs for `mobile-chrome` (chromium) and `tablet` (webkit), with a `merge-reports` job downstream. The responsive matrix uses `include:` form so each viewport carries its required browser — the install step keys off `matrix.browser`, so `tablet` installs webkit and `mobile-chrome` installs chromium. If you add a viewport, add its browser to the same matrix entry.
 
 All `actions/*` references are **pinned to full commit SHAs** with a trailing `# vX.Y.Z` comment (e.g. `actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1`). Dependabot recognizes this pattern and bumps both the SHA and the comment together — keep the format consistent when introducing new actions.
 
@@ -98,5 +109,6 @@ All `actions/*` references are **pinned to full commit SHAs** with a trailing `#
 | `tests/e2e/` | All specs. Test discovery is keyed off `testDir: "./tests/e2e"` in `playwright.config.js`. |
 | `tests/fixtures/` | Static fixtures. `sample-upload.json` is read by the Register Form spec as the picture-upload payload — the helper page accepts any file and echoes its basename back in the result table, which is what the assertion verifies. |
 | `utils/factories.js` | Faker-based test data generators. |
+| `utils/accessibility.js` | Injects the WebQualityAnalyzer bundle and asserts against a per-page baseline. |
 | `reports/` | JSON + JUnit + HTML reporter output. HTML lands in `reports/html` (note: `npm run report` uses Playwright's default `playwright-report/` — `report:open` is the one that hits `reports/html`). |
 | `test-results/` | Per-test trace, screenshot, and video artifacts. |
