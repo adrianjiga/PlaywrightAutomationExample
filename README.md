@@ -204,6 +204,20 @@ const users = userFactory.generateBatch(5);
 
 ## Configuration
 
+### Locator convention
+
+Page objects address every element through `[data-cy="..."]` — no ids, no `label[for=...]`,
+no CSS classes. Test hooks are explicit contract; an id or class is an implementation detail
+that can change for styling or refactoring reasons and take the suite down with it.
+
+Ids remain on the helper site because the Selenium project still uses them, but nothing here
+does. A new locator with no `data-cy` hook means adding one to the helper site rather than
+reaching for an id.
+
+Country and city options are addressed by **name** (`state-option-germany`,
+`city-option-berlin`) rather than the position the old ids encoded, so
+`selectState("germany")` states what it means where `selectState(0)` did not.
+
 ### Page-Owned URLs
 
 There is no top-level `baseURL` in `playwright.config.js`. Each page object owns its full URL in a `url` field and `visit()` calls `page.goto(this.url)`. To target a new host, give the page object its own absolute URL — don't rely on `page.goto("/")` patterns.
@@ -367,10 +381,6 @@ Tracked deliberately rather than left for a reader to discover:
   `body.title === "delectus aut autem"` rather than validating response shape. The Cypress
   project uses Ajv and the Selenium project uses REST Assured's
   `matchesJsonSchemaInClasspath`; this project has no equivalent.
-- **Page objects still use id-based locators.** `#firstName`, `#searchBox`, `#submit` and
-  friends predate the helper site's `data-cy` attributes. The Cypress and Selenium projects
-  have migrated; this one has not, so the helper site currently has to keep both sets of
-  hooks alive.
 - **No visual regression or performance assertions.** Accessibility is now covered (see below);
   the other two dimensions are still absent.
 
