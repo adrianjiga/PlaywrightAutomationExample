@@ -50,13 +50,26 @@ Specs are tagged in the test title with `@ui`, `@api`, `@webTables`, `@smoke`. T
 
 ### Test data factories
 
-`utils/factories.js` exposes `userFactory.generate()`, `.generateFormUser()`, and `.generateBatch(n)`, built on `@faker-js/faker`. Use these instead of hardcoding fixtures — the WebTables and Register Form suites depend on the field shapes they produce.
+`utils/factories.js` exposes `userFactory.generate()`, `.generateFormUser()`, `.generateAge()`, and `.generateBatch(n)`, built on `@faker-js/faker`. Use these instead of hardcoding fixtures — the WebTables and Register Form suites depend on the field shapes they produce. Note `generate()` returns `age` and `salary` as **strings** (the table renders them as text and the specs compare against `textContent()`), while `generateAge()` returns a **number**.
 
 ### Projects (viewport × browser matrix)
 
-`playwright.config.js` defines six projects: `chromium`, `firefox`, `webkit`, `mobile-chrome`, `mobile-safari`, `tablet`. Mobile/tablet projects override viewport on top of the device preset. A test can opt out of a viewport via `test.skip(({ viewport }) => viewport.width < 768, "reason")` — see `waitExample.spec.js` for the precedent.
+`playwright.config.js` defines six projects: `chromium`, `firefox`, `webkit`, `mobile-chrome`, `mobile-safari`, `tablet`. Mobile/tablet projects override viewport on top of the device preset. A test can opt out of a viewport via a describe-level predicate skip — see `waitExample.spec.js:5` for the precedent:
+
+```js
+test.skip(({ viewport }) => !!viewport && viewport.width < 768, "reason");
+```
+
+The `!!viewport &&` guard matters: `viewport` is nullable (a project can run with `viewport: null` for full-window mode), and dereferencing `.width` on null throws inside the skip predicate rather than skipping the test.
 
 ## Non-obvious gotchas
+
+- **Locators here are id-based, and that is legacy, not convention.** Page objects use
+  `#firstName`, `#searchBox`, `#submit` and similar — carried over from the DemoQA era. The
+  helper site has since grown `data-cy` attributes, and the sibling Cypress and Selenium
+  projects use those exclusively. The helper site keeps both alive only because this project
+  still needs the ids. When touching a locator here, prefer the `data-cy` equivalent; the
+  goal is to retire the id dependency entirely so the helper site can drop them.
 
 - **Hidden radio inputs.** The helper Register Form hides `<input type="radio">` via `display: none` and exposes click targets via labels. `RegisterFormPage.selectGender()` clicks the **label**, not the input — `check()` on the input will throw "not visible." If you add another radio-group interaction, mirror this label-click pattern.
 
@@ -75,7 +88,7 @@ Two workflows in `.github/workflows/`:
 - `ci.yml` — PR validation against `main`: lint, format check, smoke tests on chromium.
 - `playwright-tests.yml` — scheduled (Mon–Fri 07:00 UTC), on push to `main`, and on `workflow_dispatch`. Sharded matrix: `{api, ui, webTables}` × `{chromium, firefox}` (api skipped on firefox) + responsive jobs for `mobile-chrome` (chromium) and `tablet` (webkit), with a `merge-reports` job downstream. The responsive matrix uses `include:` form so each viewport carries its required browser — the install step keys off `matrix.browser`, so `tablet` installs webkit and `mobile-chrome` installs chromium. If you add a viewport, add its browser to the same matrix entry.
 
-All `actions/*` references are **pinned to full commit SHAs** with a trailing `# vX.Y.Z` comment (e.g. `actions/checkout@de0fac2... # v6.0.2`). Dependabot recognizes this pattern and bumps both the SHA and the comment together — keep the format consistent when introducing new actions.
+All `actions/*` references are **pinned to full commit SHAs** with a trailing `# vX.Y.Z` comment (e.g. `actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1`). Dependabot recognizes this pattern and bumps both the SHA and the comment together — keep the format consistent when introducing new actions.
 
 ## What lives where
 
