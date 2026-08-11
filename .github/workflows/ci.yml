@@ -31,6 +31,11 @@ jobs:
       - name: Format Code Check
         run: npm run format:check
 
+      # Not previously in CI, which is why a TypeScript 7 breaking change sat unnoticed on
+      # main: tsc removed `baseUrl`, and nothing ran tsc.
+      - name: Typecheck
+        run: npm run typecheck
+
       - name: Run smoke tests
         run: npx playwright test --grep @smoke --project=chromium
 
