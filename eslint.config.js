@@ -43,9 +43,11 @@ export default [
       "playwright/no-focused-test": "error",
       "playwright/no-skipped-test": "warn",
       "playwright/valid-expect": "error",
+      // Assertions often live in a shared helper rather than inline: page objects expose
+      // verify*(), and utils/accessibility.js exposes expectAccessibilityBaseline().
       "playwright/expect-expect": [
         "warn",
-        { assertFunctionPatterns: ["^verify"] },
+        { assertFunctionPatterns: ["^verify", "^expect[A-Z]"] },
       ],
     },
   },

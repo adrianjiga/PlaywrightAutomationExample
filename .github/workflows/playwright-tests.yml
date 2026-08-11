@@ -25,10 +25,17 @@ jobs:
             tag: "@ui"
           - name: webtables
             tag: "@webTables"
+          - name: a11y
+            tag: "@a11y"
         browser: [chromium, firefox]
         exclude:
           - group:
               name: api
+            browser: firefox
+          # The analyzer inspects the DOM, not rendering, so a second engine adds runtime
+          # without adding signal. Verified identical on chromium/firefox/webkit.
+          - group:
+              name: a11y
             browser: firefox
 
     steps:

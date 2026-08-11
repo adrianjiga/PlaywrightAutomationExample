@@ -12,6 +12,7 @@
     "test:ui": "playwright test --grep @ui",
     "test:api": "playwright test --grep @api",
     "test:webtables": "playwright test --grep @webTables",
+    "test:a11y": "playwright test --grep @a11y",
     "test:smoke": "playwright test --grep @smoke",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
@@ -72,6 +73,7 @@
     "eslint-plugin-playwright": "^2.11.0",
     "globals": "^17.9.0",
     "prettier": "^3.9.6",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "webqualityanalyzer": "github:adrianjiga/WebQualityAnalyzer"
   }
 }
