@@ -1,5 +1,12 @@
 import { expect } from "@playwright/test";
 
+/** Gender radio labels, indexed 0-2. The inputs are display:none, so tests click the label. */
+const GENDER_LABELS = [
+  '[data-cy="gender-male-label"]',
+  '[data-cy="gender-female-label"]',
+  '[data-cy="gender-other-label"]',
+];
+
 /**
  * @typedef {Object} RegisterFormData
  * @property {string} [firstName]
@@ -12,8 +19,8 @@ import { expect } from "@playwright/test";
  * @property {string[]} [subjects]
  * @property {Array<'sports'|'reading'|'music'>} [hobbies]
  * @property {string} [picture]
- * @property {number} [state]
- * @property {number} [city]
+ * @property {'germany'|'france'|'spain'|'italy'|'netherlands'} [state]
+ * @property {string} [city]
  */
 
 /**
@@ -29,28 +36,28 @@ export class RegisterFormPage {
     this.url =
       "https://adrianjiga.github.io/qa/helpers/automation-practice-form/";
 
-    this.firstName = page.locator("#firstName");
-    this.lastName = page.locator("#lastName");
-    this.email = page.locator("#userEmail");
-    this.mobile = page.locator("#userNumber");
-    this.genderMaleLabel = page.locator('label[for="gender-radio-1"]');
-    this.genderFemaleLabel = page.locator('label[for="gender-radio-2"]');
-    this.genderOtherLabel = page.locator('label[for="gender-radio-3"]');
-    this.dateOfBirthInput = page.locator("#dateOfBirthInput");
-    this.monthSelect = page.locator("#dp-month");
-    this.yearSelect = page.locator("#dp-year");
-    this.subjectsInput = page.locator("#subjectsInput");
-    this.hobbySports = page.locator("#hobbies-checkbox-1");
-    this.hobbyReading = page.locator("#hobbies-checkbox-2");
-    this.hobbyMusic = page.locator("#hobbies-checkbox-3");
-    this.uploadPicture = page.locator("#uploadPicture");
-    this.currentAddress = page.locator("#currentAddress");
-    this.stateDropdown = page.locator("#state");
-    this.cityDropdown = page.locator("#city");
-    this.submitButton = page.locator("#submit");
+    this.firstName = page.locator('[data-cy="first-name-input"]');
+    this.lastName = page.locator('[data-cy="last-name-input"]');
+    this.email = page.locator('[data-cy="email-input"]');
+    this.mobile = page.locator('[data-cy="mobile-input"]');
+    this.genderMaleLabel = page.locator('[data-cy="gender-male-label"]');
+    this.genderFemaleLabel = page.locator('[data-cy="gender-female-label"]');
+    this.genderOtherLabel = page.locator('[data-cy="gender-other-label"]');
+    this.dateOfBirthInput = page.locator('[data-cy="date-of-birth-input"]');
+    this.monthSelect = page.locator('[data-cy="month-select"]');
+    this.yearSelect = page.locator('[data-cy="year-select"]');
+    this.subjectsInput = page.locator('[data-cy="subjects-input"]');
+    this.hobbySports = page.locator('[data-cy="hobby-sports"]');
+    this.hobbyReading = page.locator('[data-cy="hobby-reading"]');
+    this.hobbyMusic = page.locator('[data-cy="hobby-music"]');
+    this.uploadPicture = page.locator('[data-cy="upload-picture"]');
+    this.currentAddress = page.locator('[data-cy="address-input"]');
+    this.stateDropdown = page.locator('[data-cy="state-dropdown"]');
+    this.cityDropdown = page.locator('[data-cy="city-dropdown"]');
+    this.submitButton = page.locator('[data-cy="submit-btn"]');
     this.closeModalButton = page.locator('[data-cy="close-modal-btn"]');
     this.modalTitle = page.locator('[data-cy="modal-title"]');
-    this.resultTable = page.locator("#result-tbody tr");
+    this.resultTable = page.locator('[data-cy="result-table"] tbody tr');
   }
 
   static messages = {
@@ -154,22 +161,32 @@ export class RegisterFormPage {
   }
 
   /**
-   * Select state (country) from dropdown
-   * @param {number} optionIndex - Index of the option (0-based)
+   * Select a country from the custom dropdown.
+   *
+   * Addressed by **name**, not position. The old `#state-option-N` ids encoded an ordering
+   * the test had to know but never stated, so `selectState(0)` silently meant Germany. The
+   * data-cy hooks are named, which makes the intent readable and survives a reordering.
+   *
+   * @param {'germany'|'france'|'spain'|'italy'|'netherlands'} country
    */
-  async selectState(optionIndex = 0) {
+  async selectState(country = "germany") {
     await this.stateDropdown.click();
-    await this.page.locator(`#state-option-${optionIndex}`).click();
+    await this.page.locator(`[data-cy="state-option-${country}"]`).click();
     return this;
   }
 
   /**
-   * Select city from dropdown
-   * @param {number} optionIndex - Index of the option (0-based)
+   * Select a city from the custom dropdown. Cities are populated by the chosen country, so
+   * this must run after {@link selectState}.
+   *
+   * Lower-cased and hyphenated, matching how the page builds the attribute:
+   * `city.toLowerCase().replace(/\s+/g, "-")`. So "Frankfurt" is `frankfurt`.
+   *
+   * @param {string} city - e.g. "berlin"
    */
-  async selectCity(optionIndex = 0) {
+  async selectCity(city = "berlin") {
     await this.cityDropdown.click();
-    await this.page.locator(`#city-option-${optionIndex}`).click();
+    await this.page.locator(`[data-cy="city-option-${city}"]`).click();
     return this;
   }
 
@@ -238,9 +255,10 @@ export class RegisterFormPage {
     await this.verifyFieldValidationError(this.mobile);
 
     for (let i = 1; i <= 3; i++) {
-      await expect(
-        this.page.locator(`label[for="gender-radio-${i}"]`)
-      ).toHaveCSS("border-color", RegisterFormPage.validationColor);
+      await expect(this.page.locator(GENDER_LABELS[i - 1])).toHaveCSS(
+        "border-color",
+        RegisterFormPage.validationColor
+      );
     }
     return this;
   }

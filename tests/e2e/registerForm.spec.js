@@ -30,8 +30,8 @@ test.describe("Register Form", () => {
       subjects: ["Maths"],
       hobbies: ["sports", "reading"],
       picture: fixturePath,
-      state: 0,
-      city: 0,
+      state: "germany",
+      city: "berlin",
     });
 
     await registerFormPage.submit();

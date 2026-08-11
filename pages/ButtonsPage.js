@@ -12,12 +12,14 @@ export class ButtonsPage {
     this.page = page;
     this.url = "https://adrianjiga.github.io/qa/helpers/buttons/";
 
-    this.doubleClickButton = page.locator("#doubleClickBtn");
-    this.rightClickButton = page.locator("#rightClickBtn");
+    this.doubleClickButton = page.locator('[data-cy="double-click-btn"]');
+    this.rightClickButton = page.locator('[data-cy="right-click-btn"]');
     this.dynamicClickButton = page.locator('[data-cy="dynamic-click-btn"]');
-    this.doubleClickMessage = page.locator("#doubleClickMessage");
-    this.rightClickMessage = page.locator("#rightClickMessage");
-    this.dynamicClickMessage = page.locator("#dynamicClickMessage");
+    this.doubleClickMessage = page.locator('[data-cy="double-click-message"]');
+    this.rightClickMessage = page.locator('[data-cy="right-click-message"]');
+    this.dynamicClickMessage = page.locator(
+      '[data-cy="dynamic-click-message"]'
+    );
   }
 
   static messages = {
