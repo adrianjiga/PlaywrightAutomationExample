@@ -67,10 +67,11 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-results-${{ matrix.group.name }}-${{ matrix.browser }}
-          path: |
-            playwright-report/
-            test-results/
-            reports/
+          # playwright-report/ and reports/ come from the html/json/junit reporters, which
+          # run only locally — CI uses list + blob + the GitHub Actions reporter. The blob
+          # report has its own upload step above; what is left worth keeping here is
+          # test-results/: traces, screenshots and videos, all produced only on failure.
+          path: test-results/
           if-no-files-found: ignore
           retention-days: 30
 
@@ -123,10 +124,11 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-results-responsive-${{ matrix.viewport }}
-          path: |
-            playwright-report/
-            test-results/
-            reports/
+          # playwright-report/ and reports/ come from the html/json/junit reporters, which
+          # run only locally — CI uses list + blob + the GitHub Actions reporter. The blob
+          # report has its own upload step above; what is left worth keeping here is
+          # test-results/: traces, screenshots and videos, all produced only on failure.
+          path: test-results/
           if-no-files-found: ignore
           retention-days: 30
 

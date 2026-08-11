@@ -39,12 +39,22 @@ jobs:
       - name: Run smoke tests
         run: npx playwright test --grep @smoke --project=chromium
 
+      # `playwright-report/` is written by the *html* reporter, which this project uses only
+      # locally — CI runs `list` + `blob` + the GitHub Actions reporter (see
+      # playwright.config.js), so that directory never exists here and the step warned
+      # "No files were found" on every green run. `blob-report/` is what CI actually
+      # produces, and it is the useful one: `playwright merge-reports` turns it into HTML.
+      #
+      # `test-results/` holds traces, screenshots, and videos, all of which are configured
+      # to appear only on failure or retry — so on a green run it is legitimately empty.
+      # `if-no-files-found: ignore` keeps that from being reported as a problem.
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-report-ci
           path: |
-            playwright-report/
+            blob-report/
             test-results/
+          if-no-files-found: ignore
           retention-days: 7
