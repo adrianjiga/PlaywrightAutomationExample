@@ -53,13 +53,18 @@ npx playwright install
 │   ├── workflows/
 │   │   ├── ci.yml                    # PR validation workflow
 │   │   └── playwright-tests.yml      # Scheduled + on-push workflow with sharded matrix
+│   ├── CODEOWNERS
 │   └── dependabot.yml
 ├── playwright.config.js              # Playwright configuration
+├── playwright.merge.config.js        # Reporter config for the CI merge-reports job
 ├── docker-compose.yml                # Docker services
 ├── Dockerfile
 ├── eslint.config.js                  # ESLint configuration
 ├── jsconfig.json                     # JavaScript/IDE configuration
 ├── tsconfig.json                     # TypeScript configuration
+├── CLAUDE.md                         # Repo conventions and gotchas
+├── .prettierrc
+├── LICENSE
 └── package.json
 ```
 
@@ -181,8 +186,11 @@ const user = userFactory.generate();
 const formUser = userFactory.generateFormUser();
 // { firstName, lastName, email, mobile, address }
 
+const age = userFactory.generateAge();
+// Random integer in [18, 65]
+
 const users = userFactory.generateBatch(5);
-// Array of 5 user objects
+// Array of 5 user objects, firstName forced to User0..User4 for ordering assertions
 ```
 
 ## Configuration
@@ -232,7 +240,7 @@ Test artifacts are retained for 30 days:
 
 ### Action Pinning
 
-All third-party actions in `.github/workflows/` are pinned to full commit SHAs with a trailing version comment (e.g. `actions/checkout@de0fac2... # v6.0.2`). This follows GitHub's security hardening guidance: SHAs are immutable, so a compromised tag cannot silently re-point at malicious code. Dependabot recognizes the pattern and bumps both the SHA and the comment together on its weekly schedule.
+All third-party actions in `.github/workflows/` are pinned to full commit SHAs with a trailing version comment (e.g. `actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1`). This follows GitHub's security hardening guidance: SHAs are immutable, so a compromised tag cannot silently re-point at malicious code. Dependabot recognizes the pattern and bumps both the SHA and the comment together on its weekly schedule.
 
 ## Reports
 
@@ -283,9 +291,16 @@ npm run typecheck     # Run TypeScript checks
 
 Each test container runs with:
 
-- Base image: `mcr.microsoft.com/playwright:v1.60.0-noble` (kept in lockstep with the `@playwright/test` npm dep)
+- Base image: `mcr.microsoft.com/playwright:v1.62.1-noble` — kept in lockstep with the
+  `@playwright/test` npm dep. The image ships the browser binaries for that exact release;
+  if the two drift apart, Playwright refuses to launch with a version-mismatch error. Both
+  are on the same weekly Dependabot schedule, so they move together.
 - Memory limit: 2GB
 - Memory reservation: 1GB
+
+`docker-compose.yml` defines six services: `playwright-tests` (everything), `ui-tests`,
+`api-tests`, `webtables-tests` (tag-filtered), and `chromium-tests` / `firefox-tests`
+(project-filtered).
 
 ## Dependency Management
 
@@ -327,6 +342,24 @@ npm run clean          # Remove reports, test-results, cache
 npm run clean:reports  # Remove reports only
 npm run docker:clean   # Remove Docker volumes and orphans
 ```
+
+## Known gaps
+
+Tracked deliberately rather than left for a reader to discover:
+
+- **`@smoke` covers one test.** Only `buttons.spec.js:should interact with double click button`
+  carries the tag, so the `ci.yml` PR gate exercises a single interaction. The sibling Cypress
+  project tags one test per spec file; this one should match.
+- **API specs assert literal values, not schemas.** `api.spec.js` checks
+  `body.title === "delectus aut autem"` rather than validating response shape. The Cypress
+  project uses Ajv and the Selenium project uses REST Assured's
+  `matchesJsonSchemaInClasspath`; this project has no equivalent.
+- **Page objects still use id-based locators.** `#firstName`, `#searchBox`, `#submit` and
+  friends predate the helper site's `data-cy` attributes. The Cypress and Selenium projects
+  have migrated; this one has not, so the helper site currently has to keep both sets of
+  hooks alive.
+- **No coverage beyond functional E2E.** No accessibility, visual regression, or performance
+  assertions in any suite.
 
 ## Comparison with Cypress
 
