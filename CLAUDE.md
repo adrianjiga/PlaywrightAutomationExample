@@ -75,18 +75,16 @@ The `!!viewport &&` guard matters: `viewport` is nullable (a project can run wit
   *and* on a baseline entry that no longer occurs. Fixing the page is therefore expected to
   turn this suite red until the stale entry is deleted — that is the mechanism, not a bug.
 
-- **Locators here are id-based, and that is legacy, not convention.** Page objects use
-  `#firstName`, `#searchBox`, `#submit` and similar — carried over from the DemoQA era. The
-  helper site has since grown `data-cy` attributes, and the sibling Cypress and Selenium
-  projects use those exclusively. The helper site keeps both alive only because this project
-  still needs the ids. When touching a locator here, prefer the `data-cy` equivalent; the
-  goal is to retire the id dependency entirely so the helper site can drop them.
+- **Locators are `data-cy` only.** Page objects address every element through
+  `[data-cy="..."]`; no ids, no `label[for=...]`, no CSS classes. Ids still exist on the
+  helper site because the Selenium project uses them, but nothing here should. A new locator
+  that has no `data-cy` hook means adding one to the helper site, not reaching for an id.
 
-- **Hidden radio inputs.** The helper Register Form hides `<input type="radio">` via `display: none` and exposes click targets via labels. `RegisterFormPage.selectGender()` clicks the **label**, not the input — `check()` on the input will throw "not visible." If you add another radio-group interaction, mirror this label-click pattern.
+- **Hidden radio inputs.** The helper Register Form hides `<input type="radio">` via `display: none` and exposes click targets via labels. `RegisterFormPage.selectGender()` clicks the **label** (`[data-cy="gender-male-label"]` and siblings), not the input — `check()` on the input will throw "not visible." If you add another radio-group interaction, mirror this label-click pattern.
 
-- **Custom date picker.** The helper page uses a custom datepicker (`#dp-month`, `#dp-year`, `[data-cy="day-XX"]`), **not** `react-datepicker`. Days are referenced by zero-padded string (`"01"`, not `1`).
+- **Custom date picker.** The helper page uses a custom datepicker (`[data-cy="month-select"]`, `[data-cy="year-select"]`, `[data-cy="day-XX"]`), **not** `react-datepicker`. Days are referenced by zero-padded string (`"01"`, not `1`).
 
-- **Custom state/city dropdowns.** Options are addressed by index (`#state-option-N`, `#city-option-N`), not by visible text. Available countries are Germany, France, Spain, Italy, Netherlands.
+- **Custom state/city dropdowns.** Options are addressed by **name**: `[data-cy="state-option-germany"]`, `[data-cy="city-option-berlin"]`. The city attribute is the visible name lower-cased with spaces hyphenated, matching how the page builds it. Cities are populated by the selected country, so `selectCity()` must follow `selectState()`. Available countries: Germany, France, Spain, Italy, Netherlands.
 
 - **WebTables CRUD persists.** Because the helper writes to `localStorage`, a failing test mid-flight can leave behind a row that breaks the next run. Always invoke `WebTablesPage.visit()` in `beforeEach` rather than reusing a single `visit()` across tests.
 
