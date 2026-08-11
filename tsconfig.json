@@ -14,14 +14,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "allowJs": true,
-    "checkJs": true,
-    "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
-    "paths": {
-      "@pages/*": ["pages/*"],
-      "@utils/*": ["utils/*"],
-      "@fixtures/*": ["tests/fixtures/*"]
-    }
+    "checkJs": true
   },
   "include": [
     "tests/**/*.js",
