@@ -190,9 +190,15 @@ export class RegisterFormPage {
   }
 
   /**
-   * Verify the confirmation modal is displayed
+   * Verify the confirmation modal is displayed.
+   *
+   * The visibility assertion is load-bearing. The modal markup is present in the DOM from
+   * page load with `display: none`, and `toContainText` does not require visibility — so on
+   * its own it passes against a modal that never opened. A submission blocked by validation
+   * would have looked like a success.
    */
   async verifySubmissionSuccess() {
+    await expect(this.modalTitle).toBeVisible();
     await expect(this.modalTitle).toContainText(
       RegisterFormPage.messages.formSubmitted
     );

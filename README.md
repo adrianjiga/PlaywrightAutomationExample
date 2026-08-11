@@ -34,6 +34,7 @@ npx playwright install
 ```
 ├── tests/
 │   ├── e2e/                          # Test specifications
+│   │   ├── accessibility.spec.js     # Accessibility audits with baselines
 │   │   ├── api.spec.js               # JSONPlaceholder API tests
 │   │   ├── buttons.spec.js           # Button interaction tests
 │   │   ├── registerForm.spec.js      # Form validation tests
@@ -47,6 +48,7 @@ npx playwright install
 │   ├── WebTablesPage.js
 │   └── index.js
 ├── utils/
+│   ├── accessibility.js              # Analyzer injection + baseline assertion
 │   ├── factories.js                  # Faker-based test data factories
 │   └── index.js
 ├── .github/
@@ -87,6 +89,7 @@ npm run test:ui           # UI tests (@ui)
 npm run test:api          # API tests (@api)
 npm run test:webtables    # Table tests (@webTables)
 npm run test:smoke        # Smoke tests (@smoke)
+npm run test:a11y         # Accessibility audits (@a11y)
 ```
 
 ### Browser Selection
@@ -149,6 +152,12 @@ npm run docker:clean
 | Test File           | Coverage                                                     |
 | ------------------- | ------------------------------------------------------------ |
 | `webTables.spec.js` | Search, edit, add, delete records, pagination, rows per page |
+
+### Accessibility Tests (`@a11y`)
+
+| Test File                | Coverage                                                              |
+| ------------------------ | --------------------------------------------------------------------- |
+| `accessibility.spec.js` | Per-page audits of buttons, web tables, and the register form — plus the register form in its submitted state, where the confirmation modal is only present at runtime |
 
 ## Page Objects
 
@@ -219,13 +228,14 @@ Runs on every PR to `main`:
 
 - Linting
 - Format checking
+- Typecheck (`tsc --noEmit`)
 - Smoke tests (chromium only)
 
 ### Scheduled Test Execution (`playwright-tests.yml`)
 
 - **Schedule**: Monday–Friday at 07:00 UTC
 - **Triggers**: Push to `main`, manual dispatch
-- **Main matrix**: Groups (`@api`, `@ui`, `@webTables`) × Browsers (`chromium`, `firefox`), with `@api` skipped on firefox.
+- **Main matrix**: Groups (`@api`, `@ui`, `@webTables`, `@a11y`) × Browsers (`chromium`, `firefox`). `@api` is skipped on firefox, and so is `@a11y` — the analyzer inspects the DOM rather than rendering, so a second engine costs runtime without adding signal.
 - **Responsive matrix**: `mobile-chrome` (chromium) and `tablet` (webkit), running `@ui` only. The `include:` form pairs each viewport with the browser it needs to install.
 - **Merge step**: Each shard uploads a blob report; a downstream `merge-reports` job merges them via `playwright.merge.config.js`.
 
@@ -361,8 +371,32 @@ Tracked deliberately rather than left for a reader to discover:
   friends predate the helper site's `data-cy` attributes. The Cypress and Selenium projects
   have migrated; this one has not, so the helper site currently has to keep both sets of
   hooks alive.
-- **No coverage beyond functional E2E.** No accessibility, visual regression, or performance
-  assertions in any suite.
+- **No visual regression or performance assertions.** Accessibility is now covered (see below);
+  the other two dimensions are still absent.
+
+## Accessibility
+
+`tests/e2e/accessibility.spec.js` audits each helper page with the analyzer from
+[WebQualityAnalyzer](https://github.com/adrianjiga/WebQualityAnalyzer) — the same engine behind
+that project's browser extension, consumed as an injectable library rather than adding a second
+a11y tool to the stack.
+
+```bash
+npm run test:a11y
+```
+
+Each page declares a **baseline** of accepted issues, and the assertion is two-way:
+
+1. An issue not in the baseline fails — a new regression.
+2. A baseline entry that no longer occurs **also** fails — the debt was paid, so delete the line.
+
+Direction 2 is what stops the baseline becoming a suppression list that only ever grows. All
+three pages currently sit at **zero**: the four issues originally recorded were real defects,
+fixed at the source in adrianjiga.github.io#12, and this suite failed until the entries were
+removed.
+
+Only accessibility is asserted. SEO and performance are disabled in `auditAccessibility` —
+they audit page quality rather than the behaviour under test.
 
 ## Comparison with Cypress
 
