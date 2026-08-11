@@ -30,24 +30,22 @@ import {
  * page quality, not the behaviour under test.
  */
 
-/** Known, accepted issues per page. Format: `type @ selector — message`. */
+/**
+ * Known, accepted issues per page. Format: `type @ selector — message`.
+ *
+ * **All three pages are currently at zero.** The four entries that used to live here were
+ * real defects — an unlabelled search box, two unlabelled date-picker selects, a <label>
+ * with no `for`, and a modal heading jumping h1 → h5. They were fixed at the source
+ * (adrianjiga.github.io#12), and this file failed until they were removed, which is the
+ * baseline mechanism working: an entry that stops occurring is itself an error.
+ *
+ * Adding an entry here is therefore a deliberate act. Do it only with a comment saying why
+ * the issue is acceptable, and treat it as debt to remove rather than a permanent exception.
+ */
 const BASELINE = {
-  // Nothing wrong. Held at zero.
   buttons: [],
-
-  // The table's search box is an unlabelled <input>. It has a placeholder, which screen
-  // readers do not reliably announce as a label.
-  webTables: [
-    "Form Accessibility @ input#searchBox — 1 form inputs without labels",
-  ],
-
-  registerForm: [
-    // The custom date picker's month/year <select>s and the subjects input carry no label
-    // or aria-label.
-    "Form Accessibility @ select#dp-month — 3 form inputs without labels",
-    // The success modal opens with an <h5> under an <h1> page heading, skipping h2–h4.
-    "Heading Hierarchy @ div#success-modal > div.modal-dialog > div.modal-content > div.modal-header:nth-of-type(1) > h5 — Heading levels are not in proper order",
-  ],
+  webTables: [],
+  registerForm: [],
 };
 
 test.describe("Accessibility", () => {
@@ -86,9 +84,13 @@ test.describe("Accessibility", () => {
   test("submitted-state register form reports no new issues @a11y", async ({
     page,
   }) => {
-    // Auditing only the initial render misses everything a page builds at runtime. The
-    // confirmation modal is injected on submit, so it is invisible to a load-time audit —
-    // and it is exactly where the heading-hierarchy defect lives.
+    // Auditing only the initial render misses whatever a page reveals at runtime — the
+    // confirmation modal is hidden until submit, and it is where the heading-hierarchy
+    // defect used to live.
+    //
+    // Date of birth is required for submission alongside first name, last name, mobile and
+    // gender, and it cannot be typed — it must be picked. Omitting it leaves the form
+    // blocked by validation and the modal shut.
     const registerFormPage = new RegisterFormPage(page);
     await registerFormPage.visit();
     await registerFormPage.fillCompleteForm({
@@ -96,6 +98,7 @@ test.describe("Accessibility", () => {
       lastName: "Lovelace",
       mobile: "1234567890",
       gender: "male",
+      dateOfBirth: { month: "January", year: "1990", day: "01" },
     });
     await registerFormPage.submit();
     await registerFormPage.verifySubmissionSuccess();
