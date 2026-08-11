@@ -35,16 +35,26 @@ const ANALYZER_BUNDLE = require.resolve("webqualityanalyzer/wqa.js");
  */
 export async function auditAccessibility(page) {
   await page.addScriptTag({ path: ANALYZER_BUNDLE });
-  return page.evaluate(
-    () =>
-      window.WebQualityAnalyzer.analyzePage({
-        seo: { enabled: false },
-        performance: { enabled: false },
-      }).categories.accessibility
-  );
+  return page.evaluate(() => {
+    // The bundle assigns this global at runtime, which static analysis cannot see. The cast
+    // borrows the package's own emitted declarations rather than reaching for `any`, so the
+    // shape of the result stays checked inside the page callback.
+    const { WebQualityAnalyzer } =
+      /** @type {typeof window & { WebQualityAnalyzer: typeof import("webqualityanalyzer") }} */ (
+        window
+      );
+    return WebQualityAnalyzer.analyzePage({
+      seo: { enabled: false },
+      performance: { enabled: false },
+    }).categories.accessibility;
+  });
 }
 
-/** Full-fidelity identity for an issue: any change to type, location, or count is a change. */
+/**
+ * Full-fidelity identity for an issue: any change to type, location, or count is a change.
+ * @param {A11yIssue} issue
+ * @returns {string}
+ */
 function fingerprint(issue) {
   return `${issue.type} @ ${issue.selector ?? "(page)"} — ${issue.message}`;
 }
