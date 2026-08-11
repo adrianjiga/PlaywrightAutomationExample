@@ -291,10 +291,13 @@ npm run typecheck     # Run TypeScript checks
 
 Each test container runs with:
 
-- Base image: `mcr.microsoft.com/playwright:v1.62.1-noble` — kept in lockstep with the
-  `@playwright/test` npm dep. The image ships the browser binaries for that exact release;
-  if the two drift apart, Playwright refuses to launch with a version-mismatch error. Both
-  are on the same weekly Dependabot schedule, so they move together.
+- Base image: `mcr.microsoft.com/playwright` — the tag is declared in the
+  [`Dockerfile`](Dockerfile) and deliberately not repeated here, because a version written
+  in two places drifts. It is kept in lockstep with the `@playwright/test` npm dep: the
+  image ships the browser binaries for that exact release, and if the two drift apart
+  Playwright refuses to launch with a version-mismatch error. Both are on the same weekly
+  Dependabot schedule, so they move together — but they arrive as separate PRs, so merge
+  them together.
 - Memory limit: 2GB
 - Memory reservation: 1GB
 
