@@ -2,9 +2,9 @@ import { expect } from "@playwright/test";
 
 /** Gender radio labels, indexed 0-2. The inputs are display:none, so tests click the label. */
 const GENDER_LABELS = [
-  '[data-cy="gender-male-label"]',
-  '[data-cy="gender-female-label"]',
-  '[data-cy="gender-other-label"]',
+  '[data-cy="genderMaleLabel"]',
+  '[data-cy="genderFemaleLabel"]',
+  '[data-cy="genderOtherLabel"]',
 ];
 
 /**
@@ -19,8 +19,8 @@ const GENDER_LABELS = [
  * @property {string[]} [subjects]
  * @property {Array<'sports'|'reading'|'music'>} [hobbies]
  * @property {string} [picture]
- * @property {'germany'|'france'|'spain'|'italy'|'netherlands'} [state]
- * @property {string} [city]
+ * @property {'Germany'|'France'|'Spain'|'Italy'|'Netherlands'} [state] - visible name
+ * @property {string} [city] - visible name, e.g. "Berlin"
  */
 
 /**
@@ -36,28 +36,28 @@ export class RegisterFormPage {
     this.url =
       "https://adrianjiga.github.io/qa/helpers/automation-practice-form/";
 
-    this.firstName = page.locator('[data-cy="first-name-input"]');
-    this.lastName = page.locator('[data-cy="last-name-input"]');
-    this.email = page.locator('[data-cy="email-input"]');
-    this.mobile = page.locator('[data-cy="mobile-input"]');
-    this.genderMaleLabel = page.locator('[data-cy="gender-male-label"]');
-    this.genderFemaleLabel = page.locator('[data-cy="gender-female-label"]');
-    this.genderOtherLabel = page.locator('[data-cy="gender-other-label"]');
-    this.dateOfBirthInput = page.locator('[data-cy="date-of-birth-input"]');
-    this.monthSelect = page.locator('[data-cy="month-select"]');
-    this.yearSelect = page.locator('[data-cy="year-select"]');
-    this.subjectsInput = page.locator('[data-cy="subjects-input"]');
-    this.hobbySports = page.locator('[data-cy="hobby-sports"]');
-    this.hobbyReading = page.locator('[data-cy="hobby-reading"]');
-    this.hobbyMusic = page.locator('[data-cy="hobby-music"]');
-    this.uploadPicture = page.locator('[data-cy="upload-picture"]');
-    this.currentAddress = page.locator('[data-cy="address-input"]');
-    this.stateDropdown = page.locator('[data-cy="state-dropdown"]');
-    this.cityDropdown = page.locator('[data-cy="city-dropdown"]');
-    this.submitButton = page.locator('[data-cy="submit-btn"]');
-    this.closeModalButton = page.locator('[data-cy="close-modal-btn"]');
-    this.modalTitle = page.locator('[data-cy="modal-title"]');
-    this.resultTable = page.locator('[data-cy="result-table"] tbody tr');
+    this.firstName = page.locator('[data-cy="firstNameInput"]');
+    this.lastName = page.locator('[data-cy="lastNameInput"]');
+    this.email = page.locator('[data-cy="emailInput"]');
+    this.mobile = page.locator('[data-cy="mobileInput"]');
+    this.genderMaleLabel = page.locator('[data-cy="genderMaleLabel"]');
+    this.genderFemaleLabel = page.locator('[data-cy="genderFemaleLabel"]');
+    this.genderOtherLabel = page.locator('[data-cy="genderOtherLabel"]');
+    this.dateOfBirthInput = page.locator('[data-cy="dateOfBirthInput"]');
+    this.monthSelect = page.locator('[data-cy="monthSelect"]');
+    this.yearSelect = page.locator('[data-cy="yearSelect"]');
+    this.subjectsInput = page.locator('[data-cy="subjectsInput"]');
+    this.hobbySports = page.locator('[data-cy="hobbySports"]');
+    this.hobbyReading = page.locator('[data-cy="hobbyReading"]');
+    this.hobbyMusic = page.locator('[data-cy="hobbyMusic"]');
+    this.uploadPicture = page.locator('[data-cy="uploadPicture"]');
+    this.currentAddress = page.locator('[data-cy="addressInput"]');
+    this.stateDropdown = page.locator('[data-cy="stateDropdown"]');
+    this.cityDropdown = page.locator('[data-cy="cityDropdown"]');
+    this.submitButton = page.locator('[data-cy="submitBtn"]');
+    this.closeModalButton = page.locator('[data-cy="closeModalBtn"]');
+    this.modalTitle = page.locator('[data-cy="modalTitle"]');
+    this.resultTable = page.locator('[data-cy="resultTable"] tbody tr');
   }
 
   static messages = {
@@ -121,7 +121,7 @@ export class RegisterFormPage {
     await this.dateOfBirthInput.click();
     await this.monthSelect.selectOption({ label: month });
     await this.yearSelect.selectOption(year);
-    await this.page.locator(`[data-cy="day-${day}"]`).click();
+    await this.page.locator(`[data-cy="day${day}"]`).click();
     return this;
   }
 
@@ -167,11 +167,13 @@ export class RegisterFormPage {
    * the test had to know but never stated, so `selectState(0)` silently meant Germany. The
    * data-cy hooks are named, which makes the intent readable and survives a reordering.
    *
-   * @param {'germany'|'france'|'spain'|'italy'|'netherlands'} country
+   * @param {'Germany'|'France'|'Spain'|'Italy'|'Netherlands'} country - the visible name
    */
-  async selectState(country = "germany") {
+  async selectState(country = "Germany") {
     await this.stateDropdown.click();
-    await this.page.locator(`[data-cy="state-option-${country}"]`).click();
+    await this.page
+      .locator(`[data-cy="stateOption${country.replace(/\s+/g, "")}"]`)
+      .click();
     return this;
   }
 
@@ -182,11 +184,13 @@ export class RegisterFormPage {
    * Lower-cased and hyphenated, matching how the page builds the attribute:
    * `city.toLowerCase().replace(/\s+/g, "-")`. So "Frankfurt" is `frankfurt`.
    *
-   * @param {string} city - e.g. "berlin"
+   * @param {string} city - the visible name, e.g. "Berlin"
    */
-  async selectCity(city = "berlin") {
+  async selectCity(city = "Berlin") {
     await this.cityDropdown.click();
-    await this.page.locator(`[data-cy="city-option-${city}"]`).click();
+    await this.page
+      .locator(`[data-cy="cityOption${city.replace(/\s+/g, "")}"]`)
+      .click();
     return this;
   }
 

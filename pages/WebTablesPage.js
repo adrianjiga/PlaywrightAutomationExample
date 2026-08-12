@@ -34,21 +34,21 @@ export class WebTablesPage {
     this.page = page;
     this.url = "https://adrianjiga.github.io/qa/helpers/webtables/";
 
-    this.searchBox = page.locator('[data-cy="search-box"]');
-    this.addNewRecordButton = page.locator('[data-cy="add-record-btn"]');
-    this.rows = page.locator('[data-cy="table-body"] tr');
-    this.modal = page.locator('[data-cy="registration-modal"]');
-    this.firstNameInput = page.locator('[data-cy="modal-first-name"]');
-    this.lastNameInput = page.locator('[data-cy="modal-last-name"]');
-    this.emailInput = page.locator('[data-cy="modal-email"]');
-    this.ageInput = page.locator('[data-cy="modal-age"]');
-    this.salaryInput = page.locator('[data-cy="modal-salary"]');
-    this.departmentInput = page.locator('[data-cy="modal-department"]');
-    this.submitButton = page.locator('[data-cy="modal-submit-btn"]');
-    this.rowsPerPageSelect = page.locator('[data-cy="rows-per-page-select"]');
-    this.totalPages = page.locator('[data-cy="total-pages"]');
-    this.nextButton = page.locator('[data-cy="next-page-btn"]');
-    this.previousButton = page.locator('[data-cy="prev-page-btn"]');
+    this.searchBox = page.locator('[data-cy="searchBox"]');
+    this.addNewRecordButton = page.locator('[data-cy="addRecordBtn"]');
+    this.rows = page.locator('[data-cy="tableBody"] tr');
+    this.modal = page.locator('[data-cy="registrationModal"]');
+    this.firstNameInput = page.locator('[data-cy="modalFirstName"]');
+    this.lastNameInput = page.locator('[data-cy="modalLastName"]');
+    this.emailInput = page.locator('[data-cy="modalEmail"]');
+    this.ageInput = page.locator('[data-cy="modalAge"]');
+    this.salaryInput = page.locator('[data-cy="modalSalary"]');
+    this.departmentInput = page.locator('[data-cy="modalDepartment"]');
+    this.submitButton = page.locator('[data-cy="modalSubmitBtn"]');
+    this.rowsPerPageSelect = page.locator('[data-cy="rowsPerPageSelect"]');
+    this.totalPages = page.locator('[data-cy="totalPages"]');
+    this.nextButton = page.locator('[data-cy="nextPageBtn"]');
+    this.previousButton = page.locator('[data-cy="prevPageBtn"]');
   }
 
   /**
@@ -119,7 +119,7 @@ export class WebTablesPage {
    * @param {number} recordId - Row position to edit
    */
   async openEditModal(recordId) {
-    await this.page.locator(`[data-cy="edit-btn-${recordId}"]`).click();
+    await this.page.locator(`[data-cy="editBtn${recordId}"]`).click();
     await this.modal.waitFor({ state: "visible" });
     return this;
   }
@@ -129,7 +129,7 @@ export class WebTablesPage {
    * @param {number} recordId - Row position to delete
    */
   async deleteRecord(recordId) {
-    await this.page.locator(`[data-cy="delete-btn-${recordId}"]`).click();
+    await this.page.locator(`[data-cy="deleteBtn${recordId}"]`).click();
     return this;
   }
 
