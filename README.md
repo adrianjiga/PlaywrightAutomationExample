@@ -2,6 +2,10 @@
 
 A reference Playwright project demonstrating UI, API, and table-interaction testing. UI specs target self-hosted helper pages at `https://adrianjiga.github.io/qa/helpers/*` (originally migrated from DemoQA), API specs hit `jsonplaceholder.typicode.com`, and `waitExample.spec.js` exercises wait patterns against `docs.cypress.io`. Features Page Object Model architecture, Faker-based test data factories, multi-browser and responsive viewport coverage, and a sharded GitHub Actions pipeline with merged blob reports.
 
+> **Architecture** — this repository is one of six that behave as a single system.
+> The [cross-repo architecture notes](https://adrianjiga.github.io/qa/architecture)
+> cover the `data-cy` contract, the coordinated-deploy problem, and the known gaps.
+
 ## Features
 
 - **Page Object Model** - Clean separation of test logic and page interactions
