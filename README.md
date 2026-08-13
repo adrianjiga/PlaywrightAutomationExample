@@ -41,7 +41,7 @@ npx playwright install
 │   │   ├── waitExample.spec.js       # Custom wait patterns
 │   │   └── webTables.spec.js         # Table CRUD operations
 │   └── fixtures/                     # Test data files
-│       └── sample-upload.json        # Picture-upload payload for the register form
+│       └── sampleUpload.json        # Picture-upload payload for the register form
 ├── pages/                            # Page Object Models
 │   ├── ButtonsPage.js
 │   ├── RegisterFormPage.js
@@ -54,12 +54,12 @@ npx playwright install
 ├── .github/
 │   ├── workflows/
 │   │   ├── ci.yml                    # PR validation workflow
-│   │   └── playwright-tests.yml      # Scheduled + on-push workflow with sharded matrix
+│   │   └── playwrightTests.yml      # Scheduled + on-push workflow with sharded matrix
 │   ├── CODEOWNERS
 │   └── dependabot.yml
 ├── playwright.config.js              # Playwright configuration
 ├── playwright.merge.config.js        # Reporter config for the CI merge-reports job
-├── docker-compose.yml                # Docker services
+├── compose.yaml                # Docker services
 ├── Dockerfile
 ├── eslint.config.js                  # ESLint configuration
 ├── jsconfig.json                     # JavaScript/IDE configuration
@@ -123,9 +123,9 @@ npx playwright test buttons.spec.js --debug
 npm run test:docker
 
 # Individual test suites
-docker compose up --build ui-tests
-docker compose up --build api-tests
-docker compose up --build webtables-tests
+docker compose up --build uiTests
+docker compose up --build apiTests
+docker compose up --build webtablesTests
 
 # Cleanup
 npm run docker:clean
@@ -245,12 +245,12 @@ Runs on every PR to `main`:
 - Typecheck (`tsc --noEmit`)
 - Smoke tests (chromium only)
 
-### Scheduled Test Execution (`playwright-tests.yml`)
+### Scheduled Test Execution (`playwrightTests.yml`)
 
 - **Schedule**: Monday–Friday at 07:00 UTC
 - **Triggers**: Push to `main`, manual dispatch
 - **Main matrix**: Groups (`@api`, `@ui`, `@webTables`, `@a11y`) × Browsers (`chromium`, `firefox`). `@api` is skipped on firefox, and so is `@a11y` — the analyzer inspects the DOM rather than rendering, so a second engine costs runtime without adding signal.
-- **Responsive matrix**: `mobile-chrome` (chromium) and `tablet` (webkit), running `@ui` only. The `include:` form pairs each viewport with the browser it needs to install.
+- **Responsive matrix**: `mobileChrome` (chromium) and `tablet` (webkit), running `@ui` only. The `include:` form pairs each viewport with the browser it needs to install.
 - **Merge step**: Each shard uploads a blob report; a downstream `merge-reports` job merges them via `playwright.merge.config.js`.
 
 ### Artifacts
@@ -325,8 +325,8 @@ Each test container runs with:
 - Memory limit: 2GB
 - Memory reservation: 1GB
 
-`docker-compose.yml` defines six services: `playwright-tests` (everything), `ui-tests`,
-`api-tests`, `webtables-tests` (tag-filtered), and `chromium-tests` / `firefox-tests`
+`compose.yaml` defines six services: `playwrightTests` (everything), `uiTests`,
+`apiTests`, `webtablesTests` (tag-filtered), and `chromiumTests` / `firefoxTests`
 (project-filtered).
 
 ## Dependency Management
