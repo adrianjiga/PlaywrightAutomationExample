@@ -64,14 +64,14 @@ export default defineConfig({
 
     // Mobile viewports
     {
-      name: "mobile-chrome",
+      name: "mobileChrome",
       use: {
         ...devices["Pixel 5"],
         viewport: viewports.mobile,
       },
     },
     {
-      name: "mobile-safari",
+      name: "mobileSafari",
       use: {
         ...devices["iPhone 12"],
         viewport: viewports.mobile,

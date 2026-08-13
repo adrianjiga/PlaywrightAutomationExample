@@ -54,7 +54,7 @@ Specs are tagged in the test title with `@ui`, `@api`, `@webTables`, `@smoke`, `
 
 ### Projects (viewport × browser matrix)
 
-`playwright.config.js` defines six projects: `chromium`, `firefox`, `webkit`, `mobile-chrome`, `mobile-safari`, `tablet`. Mobile/tablet projects override viewport on top of the device preset. A test can opt out of a viewport via a describe-level predicate skip — see `waitExample.spec.js:5` for the precedent:
+`playwright.config.js` defines six projects: `chromium`, `firefox`, `webkit`, `mobileChrome`, `mobileSafari`, `tablet`. Mobile/tablet projects override viewport on top of the device preset. A test can opt out of a viewport via a describe-level predicate skip — see `waitExample.spec.js:5` for the precedent:
 
 ```js
 test.skip(({ viewport }) => !!viewport && viewport.width < 768, "reason");
@@ -95,7 +95,7 @@ The `!!viewport &&` guard matters: `viewport` is nullable (a project can run wit
 Two workflows in `.github/workflows/`:
 
 - `ci.yml` — PR validation against `main`: lint, format check, typecheck, smoke tests on chromium. It uploads `blob-report/`, not `playwright-report/` — the html reporter only runs locally.
-- `playwright-tests.yml` — scheduled (Mon–Fri 07:00 UTC), on push to `main`, and on `workflow_dispatch`. Sharded matrix: `{api, ui, webTables, a11y}` × `{chromium, firefox}` (api and a11y skipped on firefox — a11y inspects the DOM, not rendering, so a second engine adds no signal) + responsive jobs for `mobile-chrome` (chromium) and `tablet` (webkit), with a `merge-reports` job downstream. The responsive matrix uses `include:` form so each viewport carries its required browser — the install step keys off `matrix.browser`, so `tablet` installs webkit and `mobile-chrome` installs chromium. If you add a viewport, add its browser to the same matrix entry.
+- `playwrightTests.yml` — scheduled (Mon–Fri 07:00 UTC), on push to `main`, and on `workflow_dispatch`. Sharded matrix: `{api, ui, webTables, a11y}` × `{chromium, firefox}` (api and a11y skipped on firefox — a11y inspects the DOM, not rendering, so a second engine adds no signal) + responsive jobs for `mobileChrome` (chromium) and `tablet` (webkit), with a `merge-reports` job downstream. The responsive matrix uses `include:` form so each viewport carries its required browser — the install step keys off `matrix.browser`, so `tablet` installs webkit and `mobileChrome` installs chromium. If you add a viewport, add its browser to the same matrix entry.
 
 All `actions/*` references are **pinned to full commit SHAs** with a trailing `# vX.Y.Z` comment (e.g. `actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1`). Dependabot recognizes this pattern and bumps both the SHA and the comment together — keep the format consistent when introducing new actions.
 
@@ -105,7 +105,7 @@ All `actions/*` references are **pinned to full commit SHAs** with a trailing `#
 |---|---|
 | `pages/` | Page Object Models. Each PO owns its full URL and any "reset to known state" setup in `visit()`. |
 | `tests/e2e/` | All specs. Test discovery is keyed off `testDir: "./tests/e2e"` in `playwright.config.js`. |
-| `tests/fixtures/` | Static fixtures. `sample-upload.json` is read by the Register Form spec as the picture-upload payload — the helper page accepts any file and echoes its basename back in the result table, which is what the assertion verifies. |
+| `tests/fixtures/` | Static fixtures. `sampleUpload.json` is read by the Register Form spec as the picture-upload payload — the helper page accepts any file and echoes its basename back in the result table, which is what the assertion verifies. |
 | `utils/factories.js` | Faker-based test data generators. |
 | `utils/accessibility.js` | Injects the WebQualityAnalyzer bundle and asserts against a per-page baseline. |
 | `reports/` | JSON + JUnit + HTML reporter output. HTML lands in `reports/html` (note: `npm run report` uses Playwright's default `playwright-report/` — `report:open` is the one that hits `reports/html`). |
