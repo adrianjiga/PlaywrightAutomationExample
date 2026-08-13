@@ -80,11 +80,11 @@ The `!!viewport &&` guard matters: `viewport` is nullable (a project can run wit
   helper site because the Selenium project uses them, but nothing here should. A new locator
   that has no `data-cy` hook means adding one to the helper site, not reaching for an id.
 
-- **Hidden radio inputs.** The helper Register Form hides `<input type="radio">` via `display: none` and exposes click targets via labels. `RegisterFormPage.selectGender()` clicks the **label** (`[data-cy="gender-male-label"]` and siblings), not the input — `check()` on the input will throw "not visible." If you add another radio-group interaction, mirror this label-click pattern.
+- **Hidden radio inputs.** The helper Register Form hides `<input type="radio">` via `display: none` and exposes click targets via labels. `RegisterFormPage.selectGender()` clicks the **label** (`[data-cy="genderMaleLabel"]` and siblings), not the input — `check()` on the input will throw "not visible." If you add another radio-group interaction, mirror this label-click pattern.
 
-- **Custom date picker.** The helper page uses a custom datepicker (`[data-cy="month-select"]`, `[data-cy="year-select"]`, `[data-cy="day-XX"]`), **not** `react-datepicker`. Days are referenced by zero-padded string (`"01"`, not `1`).
+- **Custom date picker.** The helper page uses a custom datepicker (`[data-cy="monthSelect"]`, `[data-cy="yearSelect"]`, `[data-cy="dayXX"]`), **not** `react-datepicker`. Days are referenced by zero-padded string (`"01"`, not `1`).
 
-- **Custom state/city dropdowns.** Options are addressed by **name**: `[data-cy="state-option-germany"]`, `[data-cy="city-option-berlin"]`. The city attribute is the visible name lower-cased with spaces hyphenated, matching how the page builds it. Cities are populated by the selected country, so `selectCity()` must follow `selectState()`. Available countries: Germany, France, Spain, Italy, Netherlands.
+- **Custom state/city dropdowns.** Options are addressed by **name**: `[data-cy="stateOptionGermany"]`, `[data-cy="cityOptionBerlin"]`. The hook is the visible name with spaces removed and capitalisation preserved, so "The Hague" is `cityOptionTheHague`. Cities are populated by the selected country, so `selectCity()` must follow `selectState()`. Available countries: Germany, France, Spain, Italy, Netherlands.
 
 - **WebTables CRUD persists.** Because the helper writes to `localStorage`, a failing test mid-flight can leave behind a row that breaks the next run. Always invoke `WebTablesPage.visit()` in `beforeEach` rather than reusing a single `visit()` across tests.
 
