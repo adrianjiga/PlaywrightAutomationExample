@@ -16,7 +16,7 @@ test.describe("Register Form", () => {
     const testUser = userFactory.generateFormUser();
     const fixturePath = path.join(
       process.cwd(),
-      "tests/fixtures/sample-upload.json"
+      "tests/fixtures/sampleUpload.json"
     );
 
     await registerFormPage.fillCompleteForm({
@@ -45,7 +45,7 @@ test.describe("Register Form", () => {
       "Date of Birth": "01 January,1990",
       Subjects: "Maths",
       Hobbies: "Sports, Reading",
-      Picture: "sample-upload.json",
+      Picture: "sampleUpload.json",
       Address: testUser.address,
       "State and City": "Germany Berlin",
     };
