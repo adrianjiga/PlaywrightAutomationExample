@@ -64,7 +64,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: blob-report-${{ matrix.group.name }}-${{ matrix.browser }}
+          name: blobReport-${{ matrix.group.name }}-${{ matrix.browser }}
           path: blob-report/
           if-no-files-found: ignore
           retention-days: 7
@@ -73,7 +73,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: playwright-results-${{ matrix.group.name }}-${{ matrix.browser }}
+          name: playwrightResults-${{ matrix.group.name }}-${{ matrix.browser }}
           # playwright-report/ and reports/ come from the html/json/junit reporters, which
           # run only locally — CI uses list + blob + the GitHub Actions reporter. The blob
           # report has its own upload step above; what is left worth keeping here is
@@ -83,7 +83,7 @@ jobs:
           retention-days: 30
 
   # Responsive testing job for UI tests
-  responsive-tests:
+  responsiveTests:
     name: Responsive - ${{ matrix.viewport }}
     runs-on: ubuntu-latest
     strategy:
@@ -121,7 +121,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: blob-report-responsive-${{ matrix.viewport }}
+          name: blobReportResponsive-${{ matrix.viewport }}
           path: blob-report/
           if-no-files-found: ignore
           retention-days: 7
@@ -130,7 +130,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: playwright-results-responsive-${{ matrix.viewport }}
+          name: playwrightResultsResponsive-${{ matrix.viewport }}
           # playwright-report/ and reports/ come from the html/json/junit reporters, which
           # run only locally — CI uses list + blob + the GitHub Actions reporter. The blob
           # report has its own upload step above; what is left worth keeping here is
@@ -140,9 +140,9 @@ jobs:
           retention-days: 30
 
   # Merge and publish reports
-  merge-reports:
+  mergeReports:
     name: Merge Test Reports
-    needs: [test, responsive-tests]
+    needs: [test, responsiveTests]
     if: always()
     runs-on: ubuntu-latest
 
@@ -162,18 +162,18 @@ jobs:
       - name: Download Blob Reports
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          path: all-blob-reports
-          pattern: blob-report-*
+          path: allBlobReports
+          pattern: blobReport*
           merge-multiple: true
 
       - name: Merge Reports
-        run: npx playwright merge-reports --config=playwright.merge.config.js ./all-blob-reports
+        run: npx playwright merge-reports --config=playwright.merge.config.js ./allBlobReports
 
       - name: Upload Final Report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: final-test-report
+          name: finalTestReport
           path: reports/final/
           if-no-files-found: warn
           retention-days: 30
