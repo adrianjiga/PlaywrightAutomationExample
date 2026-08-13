@@ -181,8 +181,9 @@ export class RegisterFormPage {
    * Select a city from the custom dropdown. Cities are populated by the chosen country, so
    * this must run after {@link selectState}.
    *
-   * Lower-cased and hyphenated, matching how the page builds the attribute:
-   * `city.toLowerCase().replace(/\s+/g, "-")`. So "Frankfurt" is `frankfurt`.
+   * The hook is the visible name with spaces removed, matching how the page builds the
+   * attribute: `cityOption${city.replace(/\s+/g, "")}`. Cities arrive capitalised, so
+   * "Frankfurt" is `cityOptionFrankfurt` and "The Hague" is `cityOptionTheHague`.
    *
    * @param {string} city - the visible name, e.g. "Berlin"
    */
