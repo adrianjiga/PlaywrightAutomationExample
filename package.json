@@ -30,10 +30,10 @@
     "docker:clean": "docker compose down --volumes --remove-orphans",
     "report": "playwright show-report",
     "report:open": "npx playwright show-report reports/html",
-    "lint": "eslint tests/**/*.js pages/**/*.js utils/**/*.js",
-    "lint:fix": "eslint tests/**/*.js pages/**/*.js utils/**/*.js --fix",
-    "format": "prettier --write \"tests/**/*.js\" \"pages/**/*.js\" \"utils/**/*.js\"",
-    "format:check": "prettier --check \"tests/**/*.js\" \"pages/**/*.js\" \"utils/**/*.js\"",
+    "lint": "biome lint",
+    "lint:fix": "biome lint --write",
+    "format": "biome format --write",
+    "format:check": "biome format",
     "clean": "rm -rf test-results playwright-report reports node_modules/.cache",
     "clean:reports": "rm -rf test-results playwright-report reports",
     "typecheck": "tsc --noEmit",
@@ -65,14 +65,9 @@
     "@playwright/test": "^1.63.0"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@biomejs/biome": "^2.5.13",
     "@estruyf/github-actions-reporter": "^1.12.0",
     "@types/node": "^26.5.1",
-    "eslint": "^10.10.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-playwright": "^2.11.0",
-    "globals": "^17.12.0",
-    "prettier": "^3.9.6",
     "typescript": "^7.0.2",
     "webqualityanalyzer": "github:adrianjiga/WebQualityAnalyzer"
   }

@@ -1,7 +1,7 @@
 import { test } from "@playwright/test";
 import { RegisterFormPage } from "../../pages/index.js";
 import { userFactory } from "../../utils/factories.js";
-import path from "path";
+import path from "node:path";
 
 test.describe("Register Form", () => {
   /** @type {RegisterFormPage} */
