@@ -20,7 +20,8 @@
     "tests/**/*.js",
     "pages/**/*.js",
     "utils/**/*.js",
-    "playwright.config.js"
+    "playwright.config.ts",
+    "playwright.merge.config.ts"
   ],
   "exclude": ["node_modules"]
 }
