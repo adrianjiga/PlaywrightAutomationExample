@@ -41,7 +41,7 @@ jobs:
 
       # `playwright-report/` is written by the *html* reporter, which this project uses only
       # locally — CI runs `list` + `blob` + the GitHub Actions reporter (see
-      # playwright.config.js), so that directory never exists here and the step warned
+      # playwright.config.ts), so that directory never exists here and the step warned
       # "No files were found" on every green run. `blob-report/` is what CI actually
       # produces, and it is the useful one: `playwright merge-reports` turns it into HTML.
       #

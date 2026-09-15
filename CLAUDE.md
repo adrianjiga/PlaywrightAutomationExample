@@ -2,21 +2,23 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+The project is written in **TypeScript** (`.ts` throughout — configs, pages, utils, and specs) and linted/formatted with **Biome** (`biome.json`), not ESLint/Prettier. TypeScript resolves `.js` extensions in import specifiers to the `.ts` files, so imports keep the `.js` suffix.
+
 ## Project at a glance
 
 A Playwright reference project demonstrating UI, API, and table-interaction testing. Tests do **not** all target the same site:
 
-- **UI suites** (`buttons.spec.js`, `registerForm.spec.js`, `webTables.spec.js`) point at **self-hosted helper pages** under `https://adrianjiga.github.io/qa/helpers/*`. These were migrated from `demoqa.com` because DemoQA's React-based pages were unreliable and ad-laden.
-- **`api.spec.js`** targets `jsonplaceholder.typicode.com` (public free API).
-- **`waitExample.spec.js`** targets `docs.cypress.io` to demo wait patterns against a real third-party site.
+- **UI suites** (`buttons.spec.ts`, `registerForm.spec.ts`, `webTables.spec.ts`) point at **self-hosted helper pages** under `https://adrianjiga.github.io/qa/helpers/*`. These were migrated from `demoqa.com` because DemoQA's React-based pages were unreliable and ad-laden.
+- **`api.spec.ts`** targets `jsonplaceholder.typicode.com` (public free API).
+- **`waitExample.spec.ts`** targets `docs.cypress.io` to demo wait patterns against a real third-party site.
 
-`playwright.config.js` does **not** define a `baseURL` — each page object owns its full URL in a `url` field and `visit()` calls `page.goto(this.url)`. Don't rely on `page.goto("/")` patterns here; if you add a spec against a new host, give the page object its own absolute URL.
+`playwright.config.ts` does **not** define a `baseURL` — each page object owns its full URL in a `url` field and `visit()` calls `page.goto(this.url)`. Don't rely on `page.goto("/")` patterns here; if you add a spec against a new host, give the page object its own absolute URL.
 
 ## Common commands
 
 ```bash
 # Single test file
-npx playwright test buttons.spec.js
+npx playwright test buttons.spec.ts
 
 # Single test by title substring
 npx playwright test -g "should interact with double click"
@@ -50,11 +52,11 @@ Specs are tagged in the test title with `@ui`, `@api`, `@webTables`, `@smoke`, `
 
 ### Test data factories
 
-`utils/factories.js` exposes `userFactory.generate()`, `.generateFormUser()`, `.generateAge()`, and `.generateBatch(n)`, built on `@faker-js/faker`. Use these instead of hardcoding fixtures — the WebTables and Register Form suites depend on the field shapes they produce. Note `generate()` returns `age` and `salary` as **strings** (the table renders them as text and the specs compare against `textContent()`), while `generateAge()` returns a **number**.
+`utils/factories.ts` exposes `userFactory.generate()`, `.generateFormUser()`, `.generateAge()`, and `.generateBatch(n)`, built on `@faker-js/faker`. Use these instead of hardcoding fixtures — the WebTables and Register Form suites depend on the field shapes they produce. Note `generate()` returns `age` and `salary` as **strings** (the table renders them as text and the specs compare against `textContent()`), while `generateAge()` returns a **number**.
 
 ### Projects (viewport × browser matrix)
 
-`playwright.config.js` defines six projects: `chromium`, `firefox`, `webkit`, `mobileChrome`, `mobileSafari`, `tablet`. Mobile/tablet projects override viewport on top of the device preset. A test can opt out of a viewport via a describe-level predicate skip — see `waitExample.spec.js:5` for the precedent:
+`playwright.config.ts` defines six projects: `chromium`, `firefox`, `webkit`, `mobileChrome`, `mobileSafari`, `tablet`. Mobile/tablet projects override viewport on top of the device preset. A test can opt out of a viewport via a describe-level predicate skip — see `waitExample.spec.ts:5` for the precedent:
 
 ```js
 test.skip(({ viewport }) => !!viewport && viewport.width < 768, "reason");
@@ -88,7 +90,7 @@ The `!!viewport &&` guard matters: `viewport` is nullable (a project can run wit
 
 - **WebTables CRUD persists.** Because the helper writes to `localStorage`, a failing test mid-flight can leave behind a row that breaks the next run. Always invoke `WebTablesPage.visit()` in `beforeEach` rather than reusing a single `visit()` across tests.
 
-- **`docs.cypress.io` on mobile hides the search button.** `waitExample.spec.js` skips viewports < 768px via a describe-level `test.skip(...)` predicate. If you add another spec against a public docs site, expect similar mobile chrome differences.
+- **`docs.cypress.io` on mobile hides the search button.** `waitExample.spec.ts` skips viewports < 768px via a describe-level `test.skip(...)` predicate. If you add another spec against a public docs site, expect similar mobile chrome differences.
 
 ## CI/CD
 
@@ -104,9 +106,9 @@ All `actions/*` references are **pinned to full commit SHAs** with a trailing `#
 | Directory | Purpose |
 |---|---|
 | `pages/` | Page Object Models. Each PO owns its full URL and any "reset to known state" setup in `visit()`. |
-| `tests/e2e/` | All specs. Test discovery is keyed off `testDir: "./tests/e2e"` in `playwright.config.js`. |
+| `tests/e2e/` | All specs. Test discovery is keyed off `testDir: "./tests/e2e"` in `playwright.config.ts`. |
 | `tests/fixtures/` | Static fixtures. `sampleUpload.json` is read by the Register Form spec as the picture-upload payload — the helper page accepts any file and echoes its basename back in the result table, which is what the assertion verifies. |
-| `utils/factories.js` | Faker-based test data generators. |
-| `utils/accessibility.js` | Injects the WebQualityAnalyzer bundle and asserts against a per-page baseline. |
+| `utils/factories.ts` | Faker-based test data generators. |
+| `utils/accessibility.ts` | Injects the WebQualityAnalyzer bundle and asserts against a per-page baseline. |
 | `reports/` | JSON + JUnit + HTML reporter output. HTML lands in `reports/html` (note: `npm run report` uses Playwright's default `playwright-report/` — `report:open` is the one that hits `reports/html`). |
 | `test-results/` | Per-test trace, screenshot, and video artifacts. |

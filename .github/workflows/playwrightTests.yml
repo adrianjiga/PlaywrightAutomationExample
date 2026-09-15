@@ -167,7 +167,7 @@ jobs:
           merge-multiple: true
 
       - name: Merge Reports
-        run: npx playwright merge-reports --config=playwright.merge.config.js ./allBlobReports
+        run: npx playwright merge-reports --config=playwright.merge.config.ts ./allBlobReports
 
       - name: Upload Final Report
         if: always()
