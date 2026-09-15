@@ -2,8 +2,7 @@ import { test } from "@playwright/test";
 import { ButtonsPage } from "../../pages/index.js";
 
 test.describe("Buttons", () => {
-  /** @type {ButtonsPage} */
-  let buttonsPage;
+  let buttonsPage: ButtonsPage;
 
   test.beforeEach(async ({ page }) => {
     buttonsPage = new ButtonsPage(page);
