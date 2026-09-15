@@ -1,14 +1,24 @@
 import { expect } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
-/**
- * Page Object for Buttons helper page
- * @see https://adrianjiga.github.io/qa/helpers/buttons/
- */
 export class ButtonsPage {
-  /**
-   * @param {import('@playwright/test').Page} page
-   */
-  constructor(page) {
+  readonly page: Page;
+  readonly url: string;
+
+  readonly doubleClickButton: Locator;
+  readonly rightClickButton: Locator;
+  readonly dynamicClickButton: Locator;
+  readonly doubleClickMessage: Locator;
+  readonly rightClickMessage: Locator;
+  readonly dynamicClickMessage: Locator;
+
+  static messages = {
+    doubleClick: "You have done a double click",
+    rightClick: "You have done a right click",
+    dynamicClick: "You have done a dynamic click",
+  };
+
+  constructor(page: Page) {
     this.page = page;
     this.url = "https://adrianjiga.github.io/qa/helpers/buttons/";
 
@@ -20,47 +30,26 @@ export class ButtonsPage {
     this.dynamicClickMessage = page.locator('[data-cy="dynamicClickMessage"]');
   }
 
-  static messages = {
-    doubleClick: "You have done a double click",
-    rightClick: "You have done a right click",
-    dynamicClick: "You have done a dynamic click",
-  };
-
-  /**
-   * Navigate to the Buttons page
-   */
   async visit() {
     await this.page.goto(this.url);
     return this;
   }
 
-  /**
-   * Perform double click on the double click button
-   */
   async performDoubleClick() {
     await this.doubleClickButton.dblclick();
     return this;
   }
 
-  /**
-   * Perform right click on the right click button
-   */
   async performRightClick() {
     await this.rightClickButton.click({ button: "right" });
     return this;
   }
 
-  /**
-   * Perform dynamic click on the dynamic button
-   */
   async performDynamicClick() {
     await this.dynamicClickButton.click();
     return this;
   }
 
-  /**
-   * Verify double click message is displayed
-   */
   async verifyDoubleClickMessage() {
     await expect(this.doubleClickMessage).toContainText(
       ButtonsPage.messages.doubleClick
@@ -68,9 +57,6 @@ export class ButtonsPage {
     return this;
   }
 
-  /**
-   * Verify right click message is displayed
-   */
   async verifyRightClickMessage() {
     await expect(this.rightClickMessage).toContainText(
       ButtonsPage.messages.rightClick
@@ -78,9 +64,6 @@ export class ButtonsPage {
     return this;
   }
 
-  /**
-   * Verify dynamic click message is displayed
-   */
   async verifyDynamicClickMessage() {
     await expect(this.dynamicClickMessage).toContainText(
       ButtonsPage.messages.dynamicClick

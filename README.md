@@ -1,6 +1,6 @@
 # Playwright Automation Example
 
-A reference Playwright project demonstrating UI, API, and table-interaction testing. UI specs target self-hosted helper pages at `https://adrianjiga.github.io/qa/helpers/*` (originally migrated from DemoQA), API specs hit `jsonplaceholder.typicode.com`, and `waitExample.spec.js` exercises wait patterns against `docs.cypress.io`. Features Page Object Model architecture, Faker-based test data factories, multi-browser and responsive viewport coverage, and a sharded GitHub Actions pipeline with merged blob reports.
+A reference Playwright project demonstrating UI, API, and table-interaction testing. UI specs target self-hosted helper pages at `https://adrianjiga.github.io/qa/helpers/*` (originally migrated from DemoQA), API specs hit `jsonplaceholder.typicode.com`, and `waitExample.spec.ts` exercises wait patterns against `docs.cypress.io`. Features Page Object Model architecture, Faker-based test data factories, multi-browser and responsive viewport coverage, and a sharded GitHub Actions pipeline with merged blob reports. The project is written in **TypeScript** and linted/formatted with **Biome**.
 
 > **Architecture** — this repository is one of six that behave as a single system.
 > The [cross-repo architecture notes](https://adrianjiga.github.io/qa/architecture)
@@ -38,38 +38,36 @@ npx playwright install
 ```
 ├── tests/
 │   ├── e2e/                          # Test specifications
-│   │   ├── accessibility.spec.js     # Accessibility audits with baselines
-│   │   ├── api.spec.js               # JSONPlaceholder API tests
-│   │   ├── buttons.spec.js           # Button interaction tests
-│   │   ├── registerForm.spec.js      # Form validation tests
-│   │   ├── waitExample.spec.js       # Custom wait patterns
-│   │   └── webTables.spec.js         # Table CRUD operations
+│   │   ├── accessibility.spec.ts     # Accessibility audits with baselines
+│   │   ├── api.spec.ts               # JSONPlaceholder API tests
+│   │   ├── buttons.spec.ts           # Button interaction tests
+│   │   ├── registerForm.spec.ts      # Form validation tests
+│   │   ├── waitExample.spec.ts       # Custom wait patterns
+│   │   └── webTables.spec.ts         # Table CRUD operations
 │   └── fixtures/                     # Test data files
 │       └── sampleUpload.json        # Picture-upload payload for the register form
 ├── pages/                            # Page Object Models
-│   ├── ButtonsPage.js
-│   ├── RegisterFormPage.js
-│   ├── WebTablesPage.js
-│   └── index.js
+│   ├── ButtonsPage.ts
+│   ├── RegisterFormPage.ts
+│   ├── WebTablesPage.ts
+│   └── index.ts
 ├── utils/
-│   ├── accessibility.js              # Analyzer injection + baseline assertion
-│   ├── factories.js                  # Faker-based test data factories
-│   └── index.js
+│   ├── accessibility.ts              # Analyzer injection + baseline assertion
+│   ├── factories.ts                  # Faker-based test data factories
+│   └── index.ts
 ├── .github/
 │   ├── workflows/
 │   │   ├── ci.yml                    # PR validation workflow
 │   │   └── playwrightTests.yml      # Scheduled + on-push workflow with sharded matrix
 │   ├── CODEOWNERS
 │   └── dependabot.yml
-├── playwright.config.js              # Playwright configuration
-├── playwright.merge.config.js        # Reporter config for the CI merge-reports job
+├── playwright.config.ts              # Playwright configuration
+├── playwright.merge.config.ts        # Reporter config for the CI merge-reports job
 ├── compose.yaml                # Docker services
 ├── Dockerfile
-├── eslint.config.js                  # ESLint configuration
-├── jsconfig.json                     # JavaScript/IDE configuration
+├── biome.json                         # Biome lint + format configuration
 ├── tsconfig.json                     # TypeScript configuration
 ├── CLAUDE.md                         # Repo conventions and gotchas
-├── .prettierrc
 ├── LICENSE
 └── package.json
 ```
@@ -117,7 +115,7 @@ npm run test:viewport:desktop   # 1920x1080
 ```bash
 npm run test:debug
 # Or with specific test
-npx playwright test buttons.spec.js --debug
+npx playwright test buttons.spec.ts --debug
 ```
 
 ### Docker Execution
@@ -141,38 +139,38 @@ npm run docker:clean
 
 | Test File              | Coverage                                              |
 | ---------------------- | ----------------------------------------------------- |
-| `buttons.spec.js`      | Double click, right click, dynamic click interactions |
-| `registerForm.spec.js` | Form validation, field errors, complete submission    |
-| `waitExample.spec.js`  | Built-in waiting patterns and polling                 |
+| `buttons.spec.ts`      | Double click, right click, dynamic click interactions |
+| `registerForm.spec.ts` | Form validation, field errors, complete submission    |
+| `waitExample.spec.ts`  | Built-in waiting patterns and polling                 |
 
 ### API Tests (`@api`)
 
 | Test File     | Coverage                                                                        |
 | ------------- | ------------------------------------------------------------------------------- |
-| `api.spec.js` | JSONPlaceholder CRUD — GET a todo, POST a new post, PUT to update, DELETE by id |
+| `api.spec.ts` | JSONPlaceholder CRUD — GET a todo, POST a new post, PUT to update, DELETE by id |
 
 ### Web Tables Tests (`@webTables`)
 
 | Test File           | Coverage                                                     |
 | ------------------- | ------------------------------------------------------------ |
-| `webTables.spec.js` | Search, edit, add, delete records, pagination, rows per page |
+| `webTables.spec.ts` | Search, edit, add, delete records, pagination, rows per page |
 
 ### Accessibility Tests (`@a11y`)
 
-| Test File                | Coverage                                                              |
-| ------------------------ | --------------------------------------------------------------------- |
-| `accessibility.spec.js` | Per-page audits of buttons, web tables, and the register form — plus the register form in its submitted state, where the confirmation modal is only present at runtime |
+| Test File               | Coverage                                                             |
+| ----------------------- | -------------------------------------------------------------------- |
+| `accessibility.spec.ts` | Per-page audits of buttons, web tables, and the register form — plus the register form in its submitted state, where the confirmation modal is only present at runtime |
 
 ## Page Objects
 
 The framework uses Page Object Model for maintainable test code:
 
-```javascript
-import { test, expect } from "@playwright/test";
+```typescript
+import { test } from "@playwright/test";
 import { ButtonsPage } from "../../pages/index.js";
 
 test.describe("Buttons", () => {
-  let buttonsPage;
+  let buttonsPage: ButtonsPage;
 
   test.beforeEach(async ({ page }) => {
     buttonsPage = new ButtonsPage(page);
@@ -186,11 +184,13 @@ test.describe("Buttons", () => {
 });
 ```
 
+Playwright resolves `.js` extensions in import specifiers to the `.ts` equivalents at runtime, so TS imports keep the `.js` suffix. Page objects are chainable — every action method returns `this`. Data types for the factories and page objects come straight from the source files.
+
 ## Test Data Factories
 
 Generate dynamic test data with Faker.js:
 
-```javascript
+```typescript
 import { userFactory } from "../../utils/factories.js";
 
 const user = userFactory.generate();
@@ -224,7 +224,7 @@ Country and city options are addressed by **name** (`state-option-germany`,
 
 ### Page-Owned URLs
 
-There is no top-level `baseURL` in `playwright.config.js`. Each page object owns its full URL in a `url` field and `visit()` calls `page.goto(this.url)`. To target a new host, give the page object its own absolute URL — don't rely on `page.goto("/")` patterns.
+There is no top-level `baseURL` in `playwright.config.ts`. Each page object owns its full URL in a `url` field and `visit()` calls `page.goto(this.url)`. To target a new host, give the page object its own absolute URL — don't rely on `page.goto("/")` patterns.
 
 ### Viewport Presets
 
@@ -236,7 +236,7 @@ There is no top-level `baseURL` in `playwright.config.js`. Each page object owns
 
 ### Test Retries
 
-- `retries: 2` is set unconditionally in `playwright.config.js`. CI additionally forces `workers: 1` for deterministic ordering; locally workers default to the Playwright auto-pick.
+- `retries: 2` is set unconditionally in `playwright.config.ts`. CI additionally forces `workers: 1` for deterministic ordering; locally workers default to the Playwright auto-pick.
 
 ## CI/CD
 
@@ -255,7 +255,7 @@ Runs on every PR to `main`:
 - **Triggers**: Push to `main`, manual dispatch
 - **Main matrix**: Groups (`@api`, `@ui`, `@webTables`, `@a11y`) × Browsers (`chromium`, `firefox`). `@api` is skipped on firefox, and so is `@a11y` — the analyzer inspects the DOM rather than rendering, so a second engine costs runtime without adding signal.
 - **Responsive matrix**: `mobileChrome` (chromium) and `tablet` (webkit), running `@ui` only. The `include:` form pairs each viewport with the browser it needs to install.
-- **Merge step**: Each shard uploads a blob report; a downstream `merge-reports` job merges them via `playwright.merge.config.js`.
+- **Merge step**: Each shard uploads a blob report; a downstream `merge-reports` job merges them via `playwright.merge.config.ts`.
 
 ### Artifacts
 
@@ -294,6 +294,9 @@ Local runs (config defaults):
 CI runs use `list` + `blob` + the GitHub Actions reporter; blob reports are merged into `reports/final/` by the downstream `merge-reports` job.
 
 ## Code Quality
+
+Linting and formatting are handled by [Biome](https://biomejs.dev) (config in `biome.json`).
+Suppressions use `// biome-ignore` comments rather than the old eslint-disable blocks.
 
 ### Linting
 
@@ -351,7 +354,7 @@ npm run codegen
 npm run trace
 
 # Run specific test file
-npx playwright test buttons.spec.js
+npx playwright test buttons.spec.ts
 
 # Run with specific tag
 npx playwright test --grep @smoke
@@ -378,10 +381,10 @@ npm run docker:clean   # Remove Docker volumes and orphans
 
 Tracked deliberately rather than left for a reader to discover:
 
-- **`@smoke` covers one test.** Only `buttons.spec.js:should interact with double click button`
+- **`@smoke` covers one test.** Only `buttons.spec.ts:should interact with double click button`
   carries the tag, so the `ci.yml` PR gate exercises a single interaction. The sibling Cypress
   project tags one test per spec file; this one should match.
-- **API specs assert literal values, not schemas.** `api.spec.js` checks
+- **API specs assert literal values, not schemas.** `api.spec.ts` checks
   `body.title === "delectus aut autem"` rather than validating response shape. The Cypress
   project uses Ajv and the Selenium project uses REST Assured's
   `matchesJsonSchemaInClasspath`; this project has no equivalent.
@@ -390,7 +393,7 @@ Tracked deliberately rather than left for a reader to discover:
 
 ## Accessibility
 
-`tests/e2e/accessibility.spec.js` audits each helper page with the analyzer from
+`tests/e2e/accessibility.spec.ts` audits each helper page with the analyzer from
 [WebQualityAnalyzer](https://github.com/adrianjiga/WebQualityAnalyzer) — the same engine behind
 that project's browser extension, consumed as an injectable library rather than adding a second
 a11y tool to the stack.

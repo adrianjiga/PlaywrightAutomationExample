@@ -1,5 +1,6 @@
 import { createRequire } from "node:module";
 import { expect } from "@playwright/test";
+import type { Page } from "@playwright/test";
 
 /**
  * `require.resolve` does not exist in an ES module, and this project is `"type": "module"` —
@@ -9,14 +10,13 @@ import { expect } from "@playwright/test";
 const require = createRequire(import.meta.url);
 const ANALYZER_BUNDLE = require.resolve("webqualityanalyzer/wqa.js");
 
-/**
- * @typedef {Object} A11yIssue
- * @property {string} type - e.g. "Form Accessibility"
- * @property {string} message
- * @property {'high'|'medium'|'low'} severity
- * @property {string} [selector] - CSS path to the first offending element
- * @property {string} [htmlSnippet]
- */
+export interface A11yIssue {
+  type: string;
+  message: string;
+  severity: "high" | "medium" | "low";
+  selector?: string;
+  htmlSnippet?: string;
+}
 
 /**
  * Injects the analyzer into the page and returns its accessibility findings.
@@ -29,20 +29,20 @@ const ANALYZER_BUNDLE = require.resolve("webqualityanalyzer/wqa.js");
  * The analyzer comes from the WebQualityAnalyzer project, which ships the same engine that
  * drives its browser extension. It is a plain IIFE assigning `window.WebQualityAnalyzer`, so
  * there is no import to resolve inside the page.
- *
- * @param {import('@playwright/test').Page} page
- * @returns {Promise<{ score: number, issues: A11yIssue[], suggestions: string[] }>}
  */
-export async function auditAccessibility(page) {
+export async function auditAccessibility(page: Page): Promise<{
+  score: number;
+  issues: A11yIssue[];
+  suggestions: string[];
+}> {
   await page.addScriptTag({ path: ANALYZER_BUNDLE });
   return page.evaluate(() => {
     // The bundle assigns this global at runtime, which static analysis cannot see. The cast
     // borrows the package's own emitted declarations rather than reaching for `any`, so the
     // shape of the result stays checked inside the page callback.
-    const { WebQualityAnalyzer } =
-      /** @type {typeof window & { WebQualityAnalyzer: typeof import("webqualityanalyzer") }} */ (
-        window
-      );
+    const { WebQualityAnalyzer } = window as typeof window & {
+      WebQualityAnalyzer: typeof import("webqualityanalyzer");
+    };
     return WebQualityAnalyzer.analyzePage({
       seo: { enabled: false },
       performance: { enabled: false },
@@ -52,10 +52,8 @@ export async function auditAccessibility(page) {
 
 /**
  * Full-fidelity identity for an issue: any change to type, location, or count is a change.
- * @param {A11yIssue} issue
- * @returns {string}
  */
-function fingerprint(issue) {
+function fingerprint(issue: A11yIssue): string {
   return `${issue.type} @ ${issue.selector ?? "(page)"} — ${issue.message}`;
 }
 
@@ -73,11 +71,11 @@ function fingerprint(issue) {
  * shrink, so the file stays an accurate record of known debt rather than a graveyard.
  *
  * A page with no known issues passes `[]` and is held at zero from then on.
- *
- * @param {A11yIssue[]} issues - what the analyzer found
- * @param {string[]} baseline - fingerprints of accepted, documented issues
  */
-export function expectAccessibilityBaseline(issues, baseline) {
+export function expectAccessibilityBaseline(
+  issues: A11yIssue[],
+  baseline: string[]
+): void {
   const found = issues.map(fingerprint);
 
   const regressions = found.filter((f) => !baseline.includes(f));

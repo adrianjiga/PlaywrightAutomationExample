@@ -12,15 +12,14 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "allowJs": true,
-    "checkJs": true
+    "noEmit": true
   },
   "include": [
-    "tests/**/*.js",
-    "pages/**/*.js",
-    "utils/**/*.js",
-    "playwright.config.js"
+    "tests/**/*.ts",
+    "pages/**/*.ts",
+    "utils/**/*.ts",
+    "playwright.config.ts",
+    "playwright.merge.config.ts"
   ],
   "exclude": ["node_modules"]
 }

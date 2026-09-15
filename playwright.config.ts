@@ -1,10 +1,4 @@
-/* eslint-disable no-undef */
 import { defineConfig, devices } from "@playwright/test";
-
-/**
- * Playwright Configuration
- * @see https://playwright.dev/docs/test-configuration
- */
 
 const viewports = {
   mobile: { width: 375, height: 667 },
@@ -39,7 +33,6 @@ export default defineConfig({
   outputDir: "test-results",
 
   projects: [
-    // Desktop browsers
     {
       name: "chromium",
       use: {
@@ -62,7 +55,6 @@ export default defineConfig({
       },
     },
 
-    // Mobile viewports
     {
       name: "mobileChrome",
       use: {
@@ -78,7 +70,6 @@ export default defineConfig({
       },
     },
 
-    // Tablet viewport
     {
       name: "tablet",
       use: {
@@ -87,8 +78,4 @@ export default defineConfig({
       },
     },
   ],
-
-  // Global setup/teardown
-  globalSetup: undefined,
-  globalTeardown: undefined,
 });

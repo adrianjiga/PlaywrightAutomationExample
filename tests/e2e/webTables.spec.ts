@@ -3,8 +3,7 @@ import { WebTablesPage } from "../../pages/index.js";
 import { userFactory } from "../../utils/factories.js";
 
 test.describe("WebTables", () => {
-  /** @type {WebTablesPage} */
-  let webTablesPage;
+  let webTablesPage: WebTablesPage;
 
   test.beforeEach(async ({ page }) => {
     webTablesPage = new WebTablesPage(page);
@@ -83,7 +82,6 @@ test.describe("WebTables", () => {
   });
 
   test("pagination when more than 5 records exist @webTables", async () => {
-    // Add 3 more users
     for (let i = 0; i < 3; i++) {
       const user = userFactory.generate({
         firstName: `User${i}`,
