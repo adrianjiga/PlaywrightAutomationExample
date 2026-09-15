@@ -26,17 +26,13 @@ export interface RegisterFormData {
   city?: string;
 }
 
-/** Gender radio labels, indexed 0-2. The inputs are display:none, so tests click the label. */
+// The radio inputs are display:none, so tests click the labels. Inputs are indexed 0-2.
 const GENDER_LABELS = [
   '[data-cy="genderMaleLabel"]',
   '[data-cy="genderFemaleLabel"]',
   '[data-cy="genderOtherLabel"]',
 ];
 
-/**
- * Page Object for Automation Practice Form helper page
- * @see https://adrianjiga.github.io/qa/helpers/automation-practice-form/
- */
 export class RegisterFormPage {
   readonly page: Page;
   readonly url: string;
@@ -99,18 +95,11 @@ export class RegisterFormPage {
     this.resultTable = page.locator('[data-cy="resultTable"] tbody tr');
   }
 
-  /**
-   * Navigate to the Practice Form page
-   */
   async visit() {
     await this.page.goto(this.url);
     return this;
   }
 
-  /**
-   * Fill basic text fields
-   * @param data - Form data
-   */
   async fillBasicInfo(data: RegisterFormData) {
     if (data.firstName) {
       await this.firstName.fill(data.firstName);
@@ -130,10 +119,6 @@ export class RegisterFormPage {
     return this;
   }
 
-  /**
-   * Select gender
-   * @param gender - Gender to select
-   */
   async selectGender(gender: Gender) {
     const genderLabelMap = {
       male: this.genderMaleLabel,
@@ -144,12 +129,6 @@ export class RegisterFormPage {
     return this;
   }
 
-  /**
-   * Select date of birth
-   * @param month - Month name (e.g., "January")
-   * @param year - Year (e.g., "1990")
-   * @param day - Day with leading zero (e.g., "01")
-   */
   async selectDateOfBirth(month: string, year: string, day: string) {
     await this.dateOfBirthInput.click();
     await this.monthSelect.selectOption({ label: month });
@@ -158,20 +137,12 @@ export class RegisterFormPage {
     return this;
   }
 
-  /**
-   * Add a subject
-   * @param subject - Subject to add
-   */
   async addSubject(subject: string) {
     await this.subjectsInput.fill(subject);
     await this.subjectsInput.press("Enter");
     return this;
   }
 
-  /**
-   * Select hobbies
-   * @param hobbies - Hobbies to select
-   */
   async selectHobbies(hobbies: Hobby[]) {
     const hobbyMap = {
       sports: this.hobbySports,
@@ -184,21 +155,15 @@ export class RegisterFormPage {
     return this;
   }
 
-  /**
-   * Upload a picture file
-   * @param filePath - Path to the file
-   */
   async uploadPictureFile(filePath: string) {
     await this.uploadPicture.setInputFiles(filePath);
     return this;
   }
 
   /**
-   * Select a country from the custom dropdown.
-   *
-   * Addressed by **name**, not position. The old `#state-option-N` ids encoded an ordering
-   * the test had to know but never stated, so `selectState(0)` silently meant Germany. The
-   * data-cy hooks are named, which makes the intent readable and survives a reordering.
+   * Options are addressed by **name**, not position. The old `#state-option-N` ids encoded an
+   * ordering the test had to know but never stated, so `selectState(0)` silently meant Germany.
+   * The data-cy hooks are named, which makes the intent readable and survives a reordering.
    *
    * @param country - the visible name
    */
@@ -211,8 +176,7 @@ export class RegisterFormPage {
   }
 
   /**
-   * Select a city from the custom dropdown. Cities are populated by the chosen country, so
-   * this must run after {@link selectState}.
+   * Cities are populated by the chosen country, so this must run after {@link selectState}.
    *
    * The hook is the visible name with spaces removed, matching how the page builds the
    * attribute: `cityOption${city.replace(/\s+/g, "")}`. Cities arrive capitalised, so
@@ -228,29 +192,21 @@ export class RegisterFormPage {
     return this;
   }
 
-  /**
-   * Submit the form
-   */
   async submit() {
     await this.submitButton.click();
     return this;
   }
 
-  /**
-   * Close the confirmation modal
-   */
   async closeModal() {
     await this.closeModalButton.click();
     return this;
   }
 
   /**
-   * Verify the confirmation modal is displayed.
-   *
-   * The visibility assertion is load-bearing. The modal markup is present in the DOM from
-   * page load with `display: none`, and `toContainText` does not require visibility — so on
-   * its own it passes against a modal that never opened. A submission blocked by validation
-   * would have looked like a success.
+   * The visibility assertion is load-bearing: the modal markup exists in the DOM from page
+   * load with `display: none`, and `toContainText` does not require visibility — so on its own
+   * it passes against a modal that never opened. `toBeVisible()` first is what catches a
+   * submission blocked by validation.
    */
   async verifySubmissionSuccess() {
     await expect(this.modalTitle).toBeVisible();
@@ -260,10 +216,6 @@ export class RegisterFormPage {
     return this;
   }
 
-  /**
-   * Verify form data in the confirmation modal
-   * @param expectedData - Key-value pairs of label and expected value
-   */
   async verifySubmittedData(expectedData: Record<string, string>) {
     for (const [label, value] of Object.entries(expectedData)) {
       const row = this.resultTable.filter({ hasText: label });
@@ -272,10 +224,6 @@ export class RegisterFormPage {
     return this;
   }
 
-  /**
-   * Verify validation error on a field
-   * @param locator - Field locator
-   */
   async verifyFieldValidationError(locator: Locator) {
     await expect(locator).toHaveCSS(
       "border-color",
@@ -284,9 +232,6 @@ export class RegisterFormPage {
     return this;
   }
 
-  /**
-   * Verify all required field validation errors
-   */
   async verifyRequiredFieldErrors() {
     await this.verifyFieldValidationError(this.firstName);
     await this.verifyFieldValidationError(this.lastName);
@@ -301,10 +246,6 @@ export class RegisterFormPage {
     return this;
   }
 
-  /**
-   * Fill complete form with all fields
-   * @param data - Complete form data
-   */
   async fillCompleteForm(data: RegisterFormData) {
     await this.fillBasicInfo({
       firstName: data.firstName,

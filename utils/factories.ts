@@ -17,15 +17,7 @@ export interface FormUser {
   address: string;
 }
 
-/**
- * Factory for generating test user data
- * Provides randomized but valid test data for forms and tables
- */
 export const userFactory = {
-  /**
-   * Generate a complete user object for WebTables
-   * @param overrides - Fields to override with specific values
-   */
   generate(overrides: Partial<WebTableUser> = {}): WebTableUser {
     return {
       firstName: faker.person.firstName(),
@@ -38,10 +30,6 @@ export const userFactory = {
     };
   },
 
-  /**
-   * Generate user data for the practice registration form
-   * @param overrides - Fields to override
-   */
   generateFormUser(overrides: Partial<FormUser> = {}): FormUser {
     return {
       firstName: faker.person.firstName(),
@@ -53,20 +41,10 @@ export const userFactory = {
     };
   },
 
-  /**
-   * Generate a random age within working range
-   * @param min - Minimum age (default: 18)
-   * @param max - Maximum age (default: 65)
-   */
   generateAge(min = 18, max = 65): number {
     return faker.number.int({ min, max });
   },
 
-  /**
-   * Generate a batch of users
-   * @param count - Number of users to generate
-   * @param commonOverrides - Overrides to apply to all users
-   */
   generateBatch(
     count: number,
     commonOverrides: Partial<WebTableUser> = {}

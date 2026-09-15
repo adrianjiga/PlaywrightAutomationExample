@@ -82,7 +82,6 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
 
-  # Responsive testing job for UI tests
   responsiveTests:
     name: Responsive - ${{ matrix.viewport }}
     runs-on: ubuntu-latest
@@ -139,7 +138,6 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
 
-  # Merge and publish reports
   mergeReports:
     name: Merge Test Reports
     needs: [test, responsiveTests]

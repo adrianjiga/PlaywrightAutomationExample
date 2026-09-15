@@ -10,10 +10,7 @@ export interface WebTableRecord {
   department?: string;
 }
 
-/**
- * Row data read back from the rendered table — values come from `textContent()`
- * and may be `null` if the cell is empty.
- */
+// Values come from `textContent()` and may be null if the cell is empty.
 export interface WebTableRow {
   firstName: string | null;
   lastName: string | null;
@@ -23,10 +20,6 @@ export interface WebTableRow {
   department: string | null;
 }
 
-/**
- * Page Object for Web Tables helper page
- * @see https://adrianjiga.github.io/qa/helpers/webtables/
- */
 export class WebTablesPage {
   readonly page: Page;
   readonly url: string;
@@ -68,9 +61,7 @@ export class WebTablesPage {
     this.previousButton = page.locator('[data-cy="prevPageBtn"]');
   }
 
-  /**
-   * Navigate to the Web Tables page and reset persisted state
-   */
+  // The helper persists records in localStorage, so clear it to start each visit clean.
   async visit() {
     await this.page.goto(this.url);
     await this.page.evaluate(() => localStorage.clear());
@@ -79,81 +70,48 @@ export class WebTablesPage {
     return this;
   }
 
-  /**
-   * Search for a record in the table
-   * @param searchText - Text to search for
-   */
   async search(searchText: string) {
     await this.searchBox.clear();
     await this.searchBox.fill(searchText);
     return this;
   }
 
-  /**
-   * Clear the search box
-   */
   async clearSearch() {
     await this.searchBox.clear();
     return this;
   }
 
-  /**
-   * Get all visible (non-empty) rows
-   */
   async getVisibleRows(): Promise<Locator> {
     return this.rows;
   }
 
-  /**
-   * Verify the number of visible rows
-   * @param count - Expected number of rows
-   */
   async verifyRowCount(count: number) {
     await expect(this.rows).toHaveCount(count);
     return this;
   }
 
-  /**
-   * Verify row count is at least a certain number
-   * @param minCount - Minimum expected rows
-   */
   async verifyMinRowCount(minCount: number) {
     await expect.poll(() => this.rows.count()).toBeGreaterThanOrEqual(minCount);
     return this;
   }
 
-  /**
-   * Click the Add New Record button and wait for modal
-   */
   async openAddModal() {
     await this.addNewRecordButton.click();
     await this.modal.waitFor({ state: "visible" });
     return this;
   }
 
-  /**
-   * Click the edit button for a specific row position (1-based)
-   * @param recordId - Row position to edit
-   */
   async openEditModal(recordId: number) {
     await this.page.locator(`[data-cy="editBtn${recordId}"]`).click();
     await this.modal.waitFor({ state: "visible" });
     return this;
   }
 
-  /**
-   * Delete a specific row by position (1-based)
-   * @param recordId - Row position to delete
-   */
   async deleteRecord(recordId: number) {
     await this.page.locator(`[data-cy="deleteBtn${recordId}"]`).click();
     return this;
   }
 
-  /**
-   * Fill the registration/edit form
-   * @param data - Form data object
-   */
   async fillForm(data: WebTableRecord) {
     if (data.firstName) {
       await this.firstNameInput.clear();
@@ -182,19 +140,12 @@ export class WebTablesPage {
     return this;
   }
 
-  /**
-   * Submit the form and wait for modal to close
-   */
   async submitForm() {
     await this.submitButton.click();
     await this.modal.waitFor({ state: "hidden" });
     return this;
   }
 
-  /**
-   * Verify a record exists with specific data
-   * @param data - Expected data in the row
-   */
   async verifyRecordExists(data: WebTableRecord) {
     const row = this.rows.filter({ hasText: data.firstName });
     await expect(row).toBeVisible();
@@ -215,10 +166,6 @@ export class WebTablesPage {
     return this;
   }
 
-  /**
-   * Verify record has edit and delete buttons
-   * @param identifier - Text to identify the row
-   */
   async verifyRecordActions(identifier: string) {
     const actionsCell = this.rows
       .filter({ hasText: identifier })
@@ -229,59 +176,36 @@ export class WebTablesPage {
     return this;
   }
 
-  /**
-   * Change the number of rows displayed per page
-   * @param rowsPerPage - Number of rows (5, 10, 20, 25, 50, 100)
-   */
   async setRowsPerPage(rowsPerPage: number) {
     await this.rowsPerPageSelect.selectOption(`${rowsPerPage}`);
     return this;
   }
 
-  /**
-   * Verify the total number of pages
-   * @param expectedPages - Expected page count as string
-   */
   async verifyTotalPages(expectedPages: string) {
     await expect(this.totalPages).toContainText(expectedPages);
     return this;
   }
 
-  /**
-   * Navigate to next page
-   */
   async goToNextPage() {
     await this.nextButton.click();
     return this;
   }
 
-  /**
-   * Navigate to previous page
-   */
   async goToPreviousPage() {
     await this.previousButton.click();
     return this;
   }
 
-  /**
-   * Verify next button is enabled
-   */
   async verifyNextEnabled() {
     await expect(this.nextButton).toBeEnabled();
     return this;
   }
 
-  /**
-   * Verify previous button is enabled
-   */
   async verifyPreviousEnabled() {
     await expect(this.previousButton).toBeEnabled();
     return this;
   }
 
-  /**
-   * Get data from the first row
-   */
   async getFirstRowData(): Promise<WebTableRow> {
     const row = this.rows.first();
     return {
@@ -294,10 +218,6 @@ export class WebTablesPage {
     };
   }
 
-  /**
-   * Get data from a specific row by index
-   * @param index - Row index (0-based)
-   */
   async getRowData(index: number): Promise<WebTableRow> {
     const row = this.rows.nth(index);
     return {

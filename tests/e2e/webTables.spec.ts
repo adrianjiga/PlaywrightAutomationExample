@@ -82,7 +82,6 @@ test.describe("WebTables", () => {
   });
 
   test("pagination when more than 5 records exist @webTables", async () => {
-    // Add 3 more users
     for (let i = 0; i < 3; i++) {
       const user = userFactory.generate({
         firstName: `User${i}`,
