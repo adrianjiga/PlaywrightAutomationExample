@@ -1,23 +1,21 @@
 import { faker } from "@faker-js/faker";
 
-/**
- * @typedef {Object} WebTableUser
- * @property {string} firstName
- * @property {string} lastName
- * @property {string} email
- * @property {string} age
- * @property {string} salary
- * @property {string} department
- */
+export interface WebTableUser {
+  firstName: string;
+  lastName: string;
+  email: string;
+  age: string;
+  salary: string;
+  department: string;
+}
 
-/**
- * @typedef {Object} FormUser
- * @property {string} firstName
- * @property {string} lastName
- * @property {string} email
- * @property {string} mobile
- * @property {string} address
- */
+export interface FormUser {
+  firstName: string;
+  lastName: string;
+  email: string;
+  mobile: string;
+  address: string;
+}
 
 /**
  * Factory for generating test user data
@@ -26,10 +24,9 @@ import { faker } from "@faker-js/faker";
 export const userFactory = {
   /**
    * Generate a complete user object for WebTables
-   * @param {Partial<WebTableUser>} [overrides] - Fields to override with specific values
-   * @returns {WebTableUser} User data object
+   * @param overrides - Fields to override with specific values
    */
-  generate(overrides = {}) {
+  generate(overrides: Partial<WebTableUser> = {}): WebTableUser {
     return {
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
@@ -43,10 +40,9 @@ export const userFactory = {
 
   /**
    * Generate user data for the practice registration form
-   * @param {Partial<FormUser>} [overrides] - Fields to override
-   * @returns {FormUser} Form user data
+   * @param overrides - Fields to override
    */
-  generateFormUser(overrides = {}) {
+  generateFormUser(overrides: Partial<FormUser> = {}): FormUser {
     return {
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
@@ -59,21 +55,22 @@ export const userFactory = {
 
   /**
    * Generate a random age within working range
-   * @param {number} [min] - Minimum age (default: 18)
-   * @param {number} [max] - Maximum age (default: 65)
-   * @returns {number} Random age
+   * @param min - Minimum age (default: 18)
+   * @param max - Maximum age (default: 65)
    */
-  generateAge(min = 18, max = 65) {
+  generateAge(min = 18, max = 65): number {
     return faker.number.int({ min, max });
   },
 
   /**
    * Generate a batch of users
-   * @param {number} count - Number of users to generate
-   * @param {Partial<WebTableUser>} [commonOverrides] - Overrides to apply to all users
-   * @returns {WebTableUser[]} Array of user objects
+   * @param count - Number of users to generate
+   * @param commonOverrides - Overrides to apply to all users
    */
-  generateBatch(count, commonOverrides = {}) {
+  generateBatch(
+    count: number,
+    commonOverrides: Partial<WebTableUser> = {}
+  ): WebTableUser[] {
     return Array.from({ length: count }, (_, index) =>
       this.generate({
         ...commonOverrides,

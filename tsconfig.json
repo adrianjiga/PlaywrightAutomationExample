@@ -17,9 +17,9 @@
     "checkJs": true
   },
   "include": [
-    "tests/**/*.js",
-    "pages/**/*.js",
-    "utils/**/*.js",
+    "tests/**/*.{js,ts}",
+    "pages/**/*.{js,ts}",
+    "utils/**/*.{js,ts}",
     "playwright.config.ts",
     "playwright.merge.config.ts"
   ],
