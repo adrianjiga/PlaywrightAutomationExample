@@ -3,8 +3,7 @@ import { WebTablesPage } from "../../pages/index.js";
 import { userFactory } from "../../utils/factories.js";
 
 test.describe("WebTables", () => {
-  /** @type {WebTablesPage} */
-  let webTablesPage;
+  let webTablesPage: WebTablesPage;
 
   test.beforeEach(async ({ page }) => {
     webTablesPage = new WebTablesPage(page);
