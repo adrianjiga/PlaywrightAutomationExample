@@ -1,36 +1,53 @@
 import { expect } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
-/**
- * @typedef {Object} WebTableRecord
- * @property {string} [firstName]
- * @property {string} [lastName]
- * @property {string} [email]
- * @property {string|number} [age]
- * @property {string|number} [salary]
- * @property {string} [department]
- */
+export interface WebTableRecord {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  age?: string | number;
+  salary?: string | number;
+  department?: string;
+}
 
 /**
  * Row data read back from the rendered table — values come from `textContent()`
  * and may be `null` if the cell is empty.
- * @typedef {Object} WebTableRow
- * @property {string|null} firstName
- * @property {string|null} lastName
- * @property {string|null} age
- * @property {string|null} email
- * @property {string|null} salary
- * @property {string|null} department
  */
+export interface WebTableRow {
+  firstName: string | null;
+  lastName: string | null;
+  age: string | null;
+  email: string | null;
+  salary: string | null;
+  department: string | null;
+}
 
 /**
  * Page Object for Web Tables helper page
  * @see https://adrianjiga.github.io/qa/helpers/webtables/
  */
 export class WebTablesPage {
-  /**
-   * @param {import('@playwright/test').Page} page
-   */
-  constructor(page) {
+  readonly page: Page;
+  readonly url: string;
+
+  readonly searchBox: Locator;
+  readonly addNewRecordButton: Locator;
+  readonly rows: Locator;
+  readonly modal: Locator;
+  readonly firstNameInput: Locator;
+  readonly lastNameInput: Locator;
+  readonly emailInput: Locator;
+  readonly ageInput: Locator;
+  readonly salaryInput: Locator;
+  readonly departmentInput: Locator;
+  readonly submitButton: Locator;
+  readonly rowsPerPageSelect: Locator;
+  readonly totalPages: Locator;
+  readonly nextButton: Locator;
+  readonly previousButton: Locator;
+
+  constructor(page: Page) {
     this.page = page;
     this.url = "https://adrianjiga.github.io/qa/helpers/webtables/";
 
@@ -64,9 +81,9 @@ export class WebTablesPage {
 
   /**
    * Search for a record in the table
-   * @param {string} searchText - Text to search for
+   * @param searchText - Text to search for
    */
-  async search(searchText) {
+  async search(searchText: string) {
     await this.searchBox.clear();
     await this.searchBox.fill(searchText);
     return this;
@@ -83,24 +100,24 @@ export class WebTablesPage {
   /**
    * Get all visible (non-empty) rows
    */
-  async getVisibleRows() {
+  async getVisibleRows(): Promise<Locator> {
     return this.rows;
   }
 
   /**
    * Verify the number of visible rows
-   * @param {number} count - Expected number of rows
+   * @param count - Expected number of rows
    */
-  async verifyRowCount(count) {
+  async verifyRowCount(count: number) {
     await expect(this.rows).toHaveCount(count);
     return this;
   }
 
   /**
    * Verify row count is at least a certain number
-   * @param {number} minCount - Minimum expected rows
+   * @param minCount - Minimum expected rows
    */
-  async verifyMinRowCount(minCount) {
+  async verifyMinRowCount(minCount: number) {
     await expect.poll(() => this.rows.count()).toBeGreaterThanOrEqual(minCount);
     return this;
   }
@@ -116,9 +133,9 @@ export class WebTablesPage {
 
   /**
    * Click the edit button for a specific row position (1-based)
-   * @param {number} recordId - Row position to edit
+   * @param recordId - Row position to edit
    */
-  async openEditModal(recordId) {
+  async openEditModal(recordId: number) {
     await this.page.locator(`[data-cy="editBtn${recordId}"]`).click();
     await this.modal.waitFor({ state: "visible" });
     return this;
@@ -126,18 +143,18 @@ export class WebTablesPage {
 
   /**
    * Delete a specific row by position (1-based)
-   * @param {number} recordId - Row position to delete
+   * @param recordId - Row position to delete
    */
-  async deleteRecord(recordId) {
+  async deleteRecord(recordId: number) {
     await this.page.locator(`[data-cy="deleteBtn${recordId}"]`).click();
     return this;
   }
 
   /**
    * Fill the registration/edit form
-   * @param {WebTableRecord} data - Form data object
+   * @param data - Form data object
    */
-  async fillForm(data) {
+  async fillForm(data: WebTableRecord) {
     if (data.firstName) {
       await this.firstNameInput.clear();
       await this.firstNameInput.fill(data.firstName);
@@ -176,9 +193,9 @@ export class WebTablesPage {
 
   /**
    * Verify a record exists with specific data
-   * @param {WebTableRecord} data - Expected data in the row
+   * @param data - Expected data in the row
    */
-  async verifyRecordExists(data) {
+  async verifyRecordExists(data: WebTableRecord) {
     const row = this.rows.filter({ hasText: data.firstName });
     await expect(row).toBeVisible();
 
@@ -200,9 +217,9 @@ export class WebTablesPage {
 
   /**
    * Verify record has edit and delete buttons
-   * @param {string} identifier - Text to identify the row
+   * @param identifier - Text to identify the row
    */
-  async verifyRecordActions(identifier) {
+  async verifyRecordActions(identifier: string) {
     const actionsCell = this.rows
       .filter({ hasText: identifier })
       .locator("td")
@@ -214,18 +231,18 @@ export class WebTablesPage {
 
   /**
    * Change the number of rows displayed per page
-   * @param {number} rowsPerPage - Number of rows (5, 10, 20, 25, 50, 100)
+   * @param rowsPerPage - Number of rows (5, 10, 20, 25, 50, 100)
    */
-  async setRowsPerPage(rowsPerPage) {
+  async setRowsPerPage(rowsPerPage: number) {
     await this.rowsPerPageSelect.selectOption(`${rowsPerPage}`);
     return this;
   }
 
   /**
    * Verify the total number of pages
-   * @param {string} expectedPages - Expected page count as string
+   * @param expectedPages - Expected page count as string
    */
-  async verifyTotalPages(expectedPages) {
+  async verifyTotalPages(expectedPages: string) {
     await expect(this.totalPages).toContainText(expectedPages);
     return this;
   }
@@ -264,9 +281,8 @@ export class WebTablesPage {
 
   /**
    * Get data from the first row
-   * @returns {Promise<WebTableRow>}
    */
-  async getFirstRowData() {
+  async getFirstRowData(): Promise<WebTableRow> {
     const row = this.rows.first();
     return {
       firstName: await row.locator("td").nth(0).textContent(),
@@ -280,10 +296,9 @@ export class WebTablesPage {
 
   /**
    * Get data from a specific row by index
-   * @param {number} index - Row index (0-based)
-   * @returns {Promise<WebTableRow>}
+   * @param index - Row index (0-based)
    */
-  async getRowData(index) {
+  async getRowData(index: number): Promise<WebTableRow> {
     const row = this.rows.nth(index);
     return {
       firstName: await row.locator("td").nth(0).textContent(),

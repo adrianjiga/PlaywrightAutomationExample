@@ -1,14 +1,28 @@
 import { expect } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 /**
  * Page Object for Buttons helper page
  * @see https://adrianjiga.github.io/qa/helpers/buttons/
  */
 export class ButtonsPage {
-  /**
-   * @param {import('@playwright/test').Page} page
-   */
-  constructor(page) {
+  readonly page: Page;
+  readonly url: string;
+
+  readonly doubleClickButton: Locator;
+  readonly rightClickButton: Locator;
+  readonly dynamicClickButton: Locator;
+  readonly doubleClickMessage: Locator;
+  readonly rightClickMessage: Locator;
+  readonly dynamicClickMessage: Locator;
+
+  static messages = {
+    doubleClick: "You have done a double click",
+    rightClick: "You have done a right click",
+    dynamicClick: "You have done a dynamic click",
+  };
+
+  constructor(page: Page) {
     this.page = page;
     this.url = "https://adrianjiga.github.io/qa/helpers/buttons/";
 
@@ -19,12 +33,6 @@ export class ButtonsPage {
     this.rightClickMessage = page.locator('[data-cy="rightClickMessage"]');
     this.dynamicClickMessage = page.locator('[data-cy="dynamicClickMessage"]');
   }
-
-  static messages = {
-    doubleClick: "You have done a double click",
-    rightClick: "You have done a right click",
-    dynamicClick: "You have done a dynamic click",
-  };
 
   /**
    * Navigate to the Buttons page

@@ -1,4 +1,30 @@
 import { expect } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
+
+export type Gender = "male" | "female" | "other";
+export type Hobby = "sports" | "reading" | "music";
+export type Country = "Germany" | "France" | "Spain" | "Italy" | "Netherlands";
+
+export interface DateOfBirth {
+  month: string;
+  year: string;
+  day: string;
+}
+
+export interface RegisterFormData {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  mobile?: string;
+  address?: string;
+  gender?: Gender;
+  dateOfBirth?: DateOfBirth;
+  subjects?: string[];
+  hobbies?: Hobby[];
+  picture?: string;
+  state?: Country;
+  city?: string;
+}
 
 /** Gender radio labels, indexed 0-2. The inputs are display:none, so tests click the label. */
 const GENDER_LABELS = [
@@ -8,30 +34,43 @@ const GENDER_LABELS = [
 ];
 
 /**
- * @typedef {Object} RegisterFormData
- * @property {string} [firstName]
- * @property {string} [lastName]
- * @property {string} [email]
- * @property {string} [mobile]
- * @property {string} [address]
- * @property {'male'|'female'|'other'} [gender]
- * @property {{ month: string, year: string, day: string }} [dateOfBirth]
- * @property {string[]} [subjects]
- * @property {Array<'sports'|'reading'|'music'>} [hobbies]
- * @property {string} [picture]
- * @property {'Germany'|'France'|'Spain'|'Italy'|'Netherlands'} [state] - visible name
- * @property {string} [city] - visible name, e.g. "Berlin"
- */
-
-/**
  * Page Object for Automation Practice Form helper page
  * @see https://adrianjiga.github.io/qa/helpers/automation-practice-form/
  */
 export class RegisterFormPage {
-  /**
-   * @param {import('@playwright/test').Page} page
-   */
-  constructor(page) {
+  readonly page: Page;
+  readonly url: string;
+
+  readonly firstName: Locator;
+  readonly lastName: Locator;
+  readonly email: Locator;
+  readonly mobile: Locator;
+  readonly genderMaleLabel: Locator;
+  readonly genderFemaleLabel: Locator;
+  readonly genderOtherLabel: Locator;
+  readonly dateOfBirthInput: Locator;
+  readonly monthSelect: Locator;
+  readonly yearSelect: Locator;
+  readonly subjectsInput: Locator;
+  readonly hobbySports: Locator;
+  readonly hobbyReading: Locator;
+  readonly hobbyMusic: Locator;
+  readonly uploadPicture: Locator;
+  readonly currentAddress: Locator;
+  readonly stateDropdown: Locator;
+  readonly cityDropdown: Locator;
+  readonly submitButton: Locator;
+  readonly closeModalButton: Locator;
+  readonly modalTitle: Locator;
+  readonly resultTable: Locator;
+
+  static messages = {
+    formSubmitted: "Thanks for submitting the form",
+  };
+
+  static validationColor = "rgb(220, 53, 69)";
+
+  constructor(page: Page) {
     this.page = page;
     this.url =
       "https://adrianjiga.github.io/qa/helpers/automation-practice-form/";
@@ -60,12 +99,6 @@ export class RegisterFormPage {
     this.resultTable = page.locator('[data-cy="resultTable"] tbody tr');
   }
 
-  static messages = {
-    formSubmitted: "Thanks for submitting the form",
-  };
-
-  static validationColor = "rgb(220, 53, 69)";
-
   /**
    * Navigate to the Practice Form page
    */
@@ -76,9 +109,9 @@ export class RegisterFormPage {
 
   /**
    * Fill basic text fields
-   * @param {RegisterFormData} data - Form data
+   * @param data - Form data
    */
-  async fillBasicInfo(data) {
+  async fillBasicInfo(data: RegisterFormData) {
     if (data.firstName) {
       await this.firstName.fill(data.firstName);
     }
@@ -99,9 +132,9 @@ export class RegisterFormPage {
 
   /**
    * Select gender
-   * @param {'male'|'female'|'other'} gender - Gender to select
+   * @param gender - Gender to select
    */
-  async selectGender(gender) {
+  async selectGender(gender: Gender) {
     const genderLabelMap = {
       male: this.genderMaleLabel,
       female: this.genderFemaleLabel,
@@ -113,11 +146,11 @@ export class RegisterFormPage {
 
   /**
    * Select date of birth
-   * @param {string} month - Month name (e.g., "January")
-   * @param {string} year - Year (e.g., "1990")
-   * @param {string} day - Day with leading zero (e.g., "01")
+   * @param month - Month name (e.g., "January")
+   * @param year - Year (e.g., "1990")
+   * @param day - Day with leading zero (e.g., "01")
    */
-  async selectDateOfBirth(month, year, day) {
+  async selectDateOfBirth(month: string, year: string, day: string) {
     await this.dateOfBirthInput.click();
     await this.monthSelect.selectOption({ label: month });
     await this.yearSelect.selectOption(year);
@@ -127,9 +160,9 @@ export class RegisterFormPage {
 
   /**
    * Add a subject
-   * @param {string} subject - Subject to add
+   * @param subject - Subject to add
    */
-  async addSubject(subject) {
+  async addSubject(subject: string) {
     await this.subjectsInput.fill(subject);
     await this.subjectsInput.press("Enter");
     return this;
@@ -137,9 +170,9 @@ export class RegisterFormPage {
 
   /**
    * Select hobbies
-   * @param {Array<'sports'|'reading'|'music'>} hobbies - Hobbies to select
+   * @param hobbies - Hobbies to select
    */
-  async selectHobbies(hobbies) {
+  async selectHobbies(hobbies: Hobby[]) {
     const hobbyMap = {
       sports: this.hobbySports,
       reading: this.hobbyReading,
@@ -153,9 +186,9 @@ export class RegisterFormPage {
 
   /**
    * Upload a picture file
-   * @param {string} filePath - Path to the file
+   * @param filePath - Path to the file
    */
-  async uploadPictureFile(filePath) {
+  async uploadPictureFile(filePath: string) {
     await this.uploadPicture.setInputFiles(filePath);
     return this;
   }
@@ -167,9 +200,9 @@ export class RegisterFormPage {
    * the test had to know but never stated, so `selectState(0)` silently meant Germany. The
    * data-cy hooks are named, which makes the intent readable and survives a reordering.
    *
-   * @param {'Germany'|'France'|'Spain'|'Italy'|'Netherlands'} country - the visible name
+   * @param country - the visible name
    */
-  async selectState(country = "Germany") {
+  async selectState(country: Country = "Germany") {
     await this.stateDropdown.click();
     await this.page
       .locator(`[data-cy="stateOption${country.replace(/\s+/g, "")}"]`)
@@ -185,9 +218,9 @@ export class RegisterFormPage {
    * attribute: `cityOption${city.replace(/\s+/g, "")}`. Cities arrive capitalised, so
    * "Frankfurt" is `cityOptionFrankfurt` and "The Hague" is `cityOptionTheHague`.
    *
-   * @param {string} city - the visible name, e.g. "Berlin"
+   * @param city - the visible name, e.g. "Berlin"
    */
-  async selectCity(city = "Berlin") {
+  async selectCity(city: string = "Berlin") {
     await this.cityDropdown.click();
     await this.page
       .locator(`[data-cy="cityOption${city.replace(/\s+/g, "")}"]`)
@@ -229,9 +262,9 @@ export class RegisterFormPage {
 
   /**
    * Verify form data in the confirmation modal
-   * @param {Object} expectedData - Key-value pairs of label and expected value
+   * @param expectedData - Key-value pairs of label and expected value
    */
-  async verifySubmittedData(expectedData) {
+  async verifySubmittedData(expectedData: Record<string, string>) {
     for (const [label, value] of Object.entries(expectedData)) {
       const row = this.resultTable.filter({ hasText: label });
       await expect(row.locator("td").nth(1)).toHaveText(value);
@@ -241,9 +274,9 @@ export class RegisterFormPage {
 
   /**
    * Verify validation error on a field
-   * @param {import('@playwright/test').Locator} locator - Field locator
+   * @param locator - Field locator
    */
-  async verifyFieldValidationError(locator) {
+  async verifyFieldValidationError(locator: Locator) {
     await expect(locator).toHaveCSS(
       "border-color",
       RegisterFormPage.validationColor
@@ -270,9 +303,9 @@ export class RegisterFormPage {
 
   /**
    * Fill complete form with all fields
-   * @param {RegisterFormData} data - Complete form data
+   * @param data - Complete form data
    */
-  async fillCompleteForm(data) {
+  async fillCompleteForm(data: RegisterFormData) {
     await this.fillBasicInfo({
       firstName: data.firstName,
       lastName: data.lastName,
