@@ -65,9 +65,9 @@
     "@playwright/test": "^1.63.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.13",
+    "@biomejs/biome": "^2.5.14",
     "@estruyf/github-actions-reporter": "^1.12.0",
-    "@types/node": "^26.5.1",
+    "@types/node": "^26.6.1",
     "typescript": "^7.0.2",
     "webqualityanalyzer": "github:adrianjiga/WebQualityAnalyzer"
   }
