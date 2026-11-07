@@ -74,7 +74,7 @@ The `!!viewport &&` guard matters: `viewport` is nullable (a project can run wit
   conditionally-shown element needs the same care.
 
 - **Accessibility baselines are two-way.** `expectAccessibilityBaseline` fails on a new issue
-  *and* on a baseline entry that no longer occurs. Fixing the page is therefore expected to
+  _and_ on a baseline entry that no longer occurs. Fixing the page is therefore expected to
   turn this suite red until the stale entry is deleted — that is the mechanism, not a bug.
 
 - **Locators are `data-cy` only.** Page objects address every element through
@@ -103,12 +103,12 @@ All `actions/*` references are **pinned to full commit SHAs** with a trailing `#
 
 ## What lives where
 
-| Directory | Purpose |
-|---|---|
-| `pages/` | Page Object Models. Each PO owns its full URL and any "reset to known state" setup in `visit()`. |
-| `tests/e2e/` | All specs. Test discovery is keyed off `testDir: "./tests/e2e"` in `playwright.config.ts`. |
-| `tests/fixtures/` | Static fixtures. `sampleUpload.json` is read by the Register Form spec as the picture-upload payload — the helper page accepts any file and echoes its basename back in the result table, which is what the assertion verifies. |
-| `utils/factories.ts` | Faker-based test data generators. |
-| `utils/accessibility.ts` | Injects the WebQualityAnalyzer bundle and asserts against a per-page baseline. |
-| `reports/` | JSON + JUnit + HTML reporter output. HTML lands in `reports/html` (note: `npm run report` uses Playwright's default `playwright-report/` — `report:open` is the one that hits `reports/html`). |
-| `test-results/` | Per-test trace, screenshot, and video artifacts. |
+| Directory                | Purpose                                                                                                                                                                                                                         |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pages/`                 | Page Object Models. Each PO owns its full URL and any "reset to known state" setup in `visit()`.                                                                                                                                |
+| `tests/e2e/`             | All specs. Test discovery is keyed off `testDir: "./tests/e2e"` in `playwright.config.ts`.                                                                                                                                      |
+| `tests/fixtures/`        | Static fixtures. `sampleUpload.json` is read by the Register Form spec as the picture-upload payload — the helper page accepts any file and echoes its basename back in the result table, which is what the assertion verifies. |
+| `utils/factories.ts`     | Faker-based test data generators.                                                                                                                                                                                               |
+| `utils/accessibility.ts` | Injects the WebQualityAnalyzer bundle and asserts against a per-page baseline.                                                                                                                                                  |
+| `reports/`               | JSON + JUnit + HTML reporter output. HTML lands in `reports/html` (note: `npm run report` uses Playwright's default `playwright-report/` — `report:open` is the one that hits `reports/html`).                                  |
+| `test-results/`          | Per-test trace, screenshot, and video artifacts.                                                                                                                                                                                |
