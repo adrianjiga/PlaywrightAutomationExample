@@ -157,8 +157,8 @@ npm run docker:clean
 
 ### Accessibility Tests (`@a11y`)
 
-| Test File               | Coverage                                                             |
-| ----------------------- | -------------------------------------------------------------------- |
+| Test File               | Coverage                                                                                                                                                               |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `accessibility.spec.ts` | Per-page audits of buttons, web tables, and the register form — plus the register form in its submitted state, where the confirmation modal is only present at runtime |
 
 ## Page Objects
